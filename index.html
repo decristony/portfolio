@@ -1,0 +1,2134 @@
+<html class="h-full" lang="en">
+
+<head>
+  <script id="aura-supabase-token-firewall">(function () {
+      if (window.__AURA_SUPABASE_FIREWALL__) return;
+      window.__AURA_SUPABASE_FIREWALL__ = true;
+
+      var SUPABASE_HOST = "hoirqrkdgbmvpwutwuwj.supabase.co";
+      var BLOCKED_KEY_PATTERNS = [
+        /^sb-[a-z0-9-]+-auth-token$/i,
+        /^supabase\.auth\.token$/i
+      ];
+
+      function isBlockedStorageKey(key) {
+        if (typeof key !== "string") return false;
+        for (var i = 0; i < BLOCKED_KEY_PATTERNS.length; i++) {
+          if (BLOCKED_KEY_PATTERNS[i].test(key)) return true;
+        }
+        return false;
+      }
+
+      function toAbsoluteUrl(input) {
+        try {
+          return new URL(input, window.location.href);
+        } catch {
+          return null;
+        }
+      }
+
+      function isSupabaseDestination(input) {
+        var parsed = toAbsoluteUrl(input);
+        if (!parsed) return false;
+        if (SUPABASE_HOST && parsed.host === SUPABASE_HOST) return true;
+        return parsed.host.endsWith(".supabase.co");
+      }
+
+      function pathLooksSensitive(input) {
+        var parsed = toAbsoluteUrl(input);
+        if (!parsed) return false;
+        return /^\/(auth|rest|functions)\/v1\//.test(parsed.pathname || "");
+      }
+
+      function headersContainAuth(headersLike) {
+        if (!headersLike) return false;
+
+        try {
+          if (typeof Headers !== "undefined" && headersLike instanceof Headers) {
+            return !!(headersLike.get("authorization") || headersLike.get("apikey"));
+          }
+        } catch { }
+
+        if (Array.isArray(headersLike)) {
+          for (var i = 0; i < headersLike.length; i++) {
+            var pair = headersLike[i] || [];
+            var name = String(pair[0] || "").toLowerCase();
+            if (name === "authorization" || name === "apikey") return true;
+          }
+          return false;
+        }
+
+        if (typeof headersLike === "object") {
+          var keys = Object.keys(headersLike);
+          for (var j = 0; j < keys.length; j++) {
+            var k = keys[j].toLowerCase();
+            if (k === "authorization" || k === "apikey") return true;
+          }
+        }
+        return false;
+      }
+
+      function requestLooksSensitive(input, init, extraHeaders) {
+        var url = "";
+        try {
+          if (typeof input === "string") {
+            url = input;
+          } else if (input && typeof input.url === "string") {
+            url = input.url;
+          }
+        } catch { }
+
+        var headers =
+          (init && init.headers) ||
+          (input && input.headers) ||
+          extraHeaders ||
+          null;
+        var hasAuthHeaders = headersContainAuth(headers);
+        if (hasAuthHeaders) return true;
+
+        if (!url) return false;
+        if (isSupabaseDestination(url) && pathLooksSensitive(url)) return true;
+        return false;
+      }
+
+      function patchStorage(storage, storageName) {
+        if (!storage) return;
+        var proto = Object.getPrototypeOf(storage);
+        if (!proto || proto.__auraSupabaseFirewallPatched) return;
+
+        var rawGetItem = proto.getItem;
+        var rawSetItem = proto.setItem;
+        var rawRemoveItem = proto.removeItem;
+        var rawClear = proto.clear;
+        var rawKey = proto.key;
+        var rawLengthDescriptor = Object.getOwnPropertyDescriptor(proto, "length");
+        var rawLengthGet = rawLengthDescriptor && rawLengthDescriptor.get;
+
+        function getRawLength(instance) {
+          try {
+            if (rawLengthGet) return Number(rawLengthGet.call(instance) || 0);
+          } catch { }
+          try {
+            return Number(instance.length || 0);
+          } catch { }
+          return 0;
+        }
+
+        function getVisibleKeys(instance) {
+          var visible = [];
+          var total = getRawLength(instance);
+          for (var i = 0; i < total; i++) {
+            var currentKey = rawKey.call(instance, i);
+            if (currentKey && !isBlockedStorageKey(currentKey)) {
+              visible.push(currentKey);
+            }
+          }
+          return visible;
+        }
+
+        function maskBlockedKeyProperty(instance, keyName) {
+          if (!keyName || !isBlockedStorageKey(keyName)) return;
+          try {
+            Object.defineProperty(instance, keyName, {
+              configurable: true,
+              enumerable: false,
+              get: function () {
+                return null;
+              },
+              set: function () {
+                return true;
+              }
+            });
+          } catch { }
+        }
+
+        function syncBlockedKeyProperties(instance) {
+          var total = getRawLength(instance);
+          for (var i = 0; i < total; i++) {
+            var k = rawKey.call(instance, i);
+            if (k) maskBlockedKeyProperty(instance, k);
+          }
+        }
+
+        proto.getItem = function (key) {
+          syncBlockedKeyProperties(this);
+          if (isBlockedStorageKey(String(key))) return null;
+          return rawGetItem.call(this, key);
+        };
+
+        proto.setItem = function (key, value) {
+          if (isBlockedStorageKey(String(key))) return;
+          return rawSetItem.call(this, key, value);
+        };
+
+        proto.removeItem = function (key) {
+          if (isBlockedStorageKey(String(key))) return;
+          return rawRemoveItem.call(this, key);
+        };
+
+        proto.clear = function () {
+          if (typeof rawClear !== "function") return;
+
+          // Preserve blocked keys across clear() to prevent auth token/session wipe.
+          var preservedBlockedEntries = [];
+          var total = getRawLength(this);
+          for (var i = 0; i < total; i++) {
+            var blockedKey = rawKey.call(this, i);
+            if (blockedKey && isBlockedStorageKey(blockedKey)) {
+              preservedBlockedEntries.push([
+                blockedKey,
+                rawGetItem.call(this, blockedKey),
+              ]);
+            }
+          }
+
+          rawClear.call(this);
+
+          for (var j = 0; j < preservedBlockedEntries.length; j++) {
+            var entry = preservedBlockedEntries[j];
+            var key = entry[0];
+            var value = entry[1];
+            if (typeof key === "string" && typeof value === "string") {
+              rawSetItem.call(this, key, value);
+            }
+          }
+
+          syncBlockedKeyProperties(this);
+        };
+
+        proto.key = function (index) {
+          syncBlockedKeyProperties(this);
+          var visible = getVisibleKeys(this);
+          return visible[index] || null;
+        };
+
+        try {
+          Object.defineProperty(proto, "length", {
+            configurable: true,
+            enumerable: false,
+            get: function () {
+              syncBlockedKeyProperties(this);
+              return getVisibleKeys(this).length;
+            }
+          });
+        } catch { }
+
+        var proxyStorage = null;
+        try {
+          proxyStorage = new Proxy(storage, {
+            get: function (target, prop) {
+              if (typeof prop === "string" && isBlockedStorageKey(prop)) return null;
+              if (prop === "length") return getVisibleKeys(target).length;
+              if (prop === "key") {
+                return function (index) {
+                  var visible = getVisibleKeys(target);
+                  return visible[index] || null;
+                };
+              }
+              if (prop === "clear") {
+                return function () {
+                  if (typeof rawClear !== "function") return;
+
+                  var preservedBlockedEntries = [];
+                  var total = getRawLength(target);
+                  for (var i = 0; i < total; i++) {
+                    var blockedKey = rawKey.call(target, i);
+                    if (blockedKey && isBlockedStorageKey(blockedKey)) {
+                      preservedBlockedEntries.push([
+                        blockedKey,
+                        rawGetItem.call(target, blockedKey),
+                      ]);
+                    }
+                  }
+
+                  rawClear.call(target);
+
+                  for (var j = 0; j < preservedBlockedEntries.length; j++) {
+                    var entry = preservedBlockedEntries[j];
+                    var key = entry[0];
+                    var value = entry[1];
+                    if (typeof key === "string" && typeof value === "string") {
+                      rawSetItem.call(target, key, value);
+                    }
+                  }
+
+                  syncBlockedKeyProperties(target);
+                };
+              }
+
+              var value = target[prop];
+              if (typeof value === "function") return value.bind(target);
+              return value;
+            },
+            set: function (target, prop, value) {
+              if (typeof prop === "string" && isBlockedStorageKey(prop)) return true;
+              target[prop] = value;
+              return true;
+            },
+            has: function (target, prop) {
+              if (typeof prop === "string" && isBlockedStorageKey(prop)) return false;
+              return prop in target;
+            },
+            deleteProperty: function (target, prop) {
+              if (typeof prop === "string" && isBlockedStorageKey(prop)) return true;
+              try {
+                delete target[prop];
+              } catch { }
+              return true;
+            },
+            ownKeys: function (target) {
+              return getVisibleKeys(target);
+            },
+            getOwnPropertyDescriptor: function (target, prop) {
+              if (typeof prop === "string" && isBlockedStorageKey(prop)) {
+                return undefined;
+              }
+              if (prop === "length") {
+                return {
+                  configurable: true,
+                  enumerable: false,
+                  value: getVisibleKeys(target).length,
+                  writable: false
+                };
+              }
+              return Object.getOwnPropertyDescriptor(target, prop);
+            }
+          });
+        } catch { }
+
+        try {
+          if (proxyStorage) {
+            Object.defineProperty(window, storageName, {
+              configurable: true,
+              enumerable: true,
+              get: function () {
+                return proxyStorage;
+              }
+            });
+          }
+        } catch { }
+
+        syncBlockedKeyProperties(storage);
+        proto.__auraSupabaseFirewallPatched = true;
+      }
+
+      function patchCookieAccess() {
+        try {
+          var cookieDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, "cookie");
+          if (!cookieDescriptor || !cookieDescriptor.configurable) return;
+
+          Object.defineProperty(document, "cookie", {
+            configurable: true,
+            enumerable: false,
+            get: function () {
+              return "";
+            },
+            set: function () {
+              return true;
+            }
+          });
+        } catch { }
+      }
+
+      function patchFetch() {
+        if (typeof window.fetch !== "function") return;
+        var rawFetch = window.fetch.bind(window);
+        window.fetch = function (input, init) {
+          if (requestLooksSensitive(input, init, null)) {
+            return Promise.reject(new Error("Blocked by Aura security policy"));
+          }
+          return rawFetch(input, init);
+        };
+      }
+
+      function patchXHR() {
+        if (typeof XMLHttpRequest === "undefined") return;
+        var rawOpen = XMLHttpRequest.prototype.open;
+        var rawSetHeader = XMLHttpRequest.prototype.setRequestHeader;
+        var rawSend = XMLHttpRequest.prototype.send;
+
+        XMLHttpRequest.prototype.open = function (method, url) {
+          this.__auraRequestUrl = String(url || "");
+          this.__auraHeaders = {};
+          return rawOpen.apply(this, arguments);
+        };
+
+        XMLHttpRequest.prototype.setRequestHeader = function (name, value) {
+          if (!this.__auraHeaders) this.__auraHeaders = {};
+          this.__auraHeaders[String(name || "").toLowerCase()] = String(value || "");
+          return rawSetHeader.apply(this, arguments);
+        };
+
+        XMLHttpRequest.prototype.send = function () {
+          if (requestLooksSensitive(this.__auraRequestUrl || "", null, this.__auraHeaders || null)) {
+            throw new Error("Blocked by Aura security policy");
+          }
+          return rawSend.apply(this, arguments);
+        };
+      }
+
+      function patchBeacon() {
+        if (typeof navigator.sendBeacon !== "function") return;
+        var rawBeacon = navigator.sendBeacon.bind(navigator);
+        navigator.sendBeacon = function (url, data) {
+          if (requestLooksSensitive(url, null, null)) return false;
+          return rawBeacon(url, data);
+        };
+      }
+
+      function patchWebSocket() {
+        if (typeof WebSocket === "undefined") return;
+        var RawWebSocket = WebSocket;
+        window.WebSocket = function (url, protocols) {
+          if (requestLooksSensitive(String(url || ""), null, null)) {
+            throw new Error("Blocked by Aura security policy");
+          }
+          return new RawWebSocket(url, protocols);
+        };
+        window.WebSocket.prototype = RawWebSocket.prototype;
+      }
+
+      patchStorage(window.localStorage, "localStorage");
+      patchStorage(window.sessionStorage, "sessionStorage");
+      patchCookieAccess();
+      patchFetch();
+      patchXHR();
+      patchBeacon();
+      patchWebSocket();
+    })();</script>
+  <script>
+    try { if (window.parent && window.parent !== window) { window.parent.promotekit_referral = "1fd2949a-d22c-431b-92bf-02d4ad04ee24"; window.parent.document.cookie = "promotekit_referral=1fd2949a-d22c-431b-92bf-02d4ad04ee24;path=/;domain=.aura.build;max-age=31536000" } } catch (e) { }
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Tony (Decristony) — Web Designer &amp; Desenvolvedor</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="assets/css2_19fd9cc6b396.css" rel="stylesheet" />
+  <script src="assets/resource_3fa48481346f.es"></script>
+  <script src="assets/iconify-icon_e19829e7f0e8.js"></script>
+  <script src="assets/lucide_latest_2eebd0ebe8c2.es"></script>
+  <meta
+    content="font-roboto,font-montserrat,font-poppins,font-instrument-serif,font-merriweather,font-bricolage,font-jakarta,font-manrope,font-space-grotesk,font-work-sans,font-pt-serif,font-geist-mono,font-space-mono,font-quicksand,font-nunito,font-newsreader,font-google-sans-flex,font-oswald,font-dm-sans,font-cormorant,font-playfair"
+    name="disabled-font-classes" />
+  <style>
+    @keyframes marquee {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .animate-marquee {
+      animation: marquee 40s linear infinite;
+    }
+
+    .pause-on-hover:hover {
+      animation-play-state: paused;
+    }
+  </style>
+  <link href="assets/css2_86e10c4bcbd4.css" id="all-fonts-link-font-geist" rel="stylesheet" />
+  <style id="all-fonts-style-font-geist">
+    .font-geist {
+      font-family: 'Geist', sans-serif !important;
+    }
+  </style>
+  <style data-scroll-fix="true">
+    /* Scroll fixes for offline viewing */
+    html,
+    body {
+      overflow: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: 100% !important;
+      scroll-behavior: auto !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    /* Force visibility - many sites use JS animations for initial display */
+    body,
+    .wrapper,
+    main,
+    #__next,
+    #app,
+    .page,
+    .content {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: none !important;
+    }
+
+    /* Disable loader/preloader overlays */
+    .loader,
+    .preloader,
+    .loading,
+    [class*="loader"],
+    [class*="preloader"] {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
+    /* Show elements that might be hidden for animation */
+    .word-inner,
+    .char,
+    .line,
+    [data-aos],
+    [data-scroll],
+    .hero-text span,
+    .hero-fade,
+    [class*="hero"] span {
+      opacity: 1 !important;
+      transform: none !important;
+      visibility: visible !important;
+    }
+
+    /* Reset Tailwind animation utility classes */
+    .translate-y-full,
+    .translate-x-full,
+    .-translate-y-full,
+    .-translate-x-full,
+    .translate-y-1\/2,
+    .-translate-y-1\/2,
+    .translate-y-\[100\%\],
+    .translate-y-\[110\%\] {
+      transform: none !important;
+    }
+
+    /* Force visibility on common hidden-for-animation patterns */
+    .opacity-0,
+    [class*="opacity-0"] {
+      opacity: 1 !important;
+    }
+
+    /* Reset scale transforms used for animations */
+    .scale-0,
+    .scale-50,
+    .scale-75 {
+      transform: none !important;
+    }
+
+    html.lenis,
+    html.lenis-smooth,
+    body.lenis,
+    body.lenis-smooth,
+    .lenis-wrapper,
+    .lenis-content,
+    [data-lenis-prevent],
+    [data-scroll-container] {
+      overflow: visible !important;
+      height: auto !important;
+    }
+
+    /* Fix flex containers that might cut off content */
+    body.flex.items-center,
+    body.flex.justify-center {
+      align-items: flex-start !important;
+      min-height: 100vh;
+      height: auto !important;
+    }
+
+    /* Ensure main content scrolls */
+    main,
+    #__next,
+    #__nuxt,
+    #app,
+    .main-content {
+      overflow: visible !important;
+      height: auto !important;
+    }
+  </style>
+  <!-- MediaPipe (Global Scripts for reliability) -->
+  <script src="assets/camera_utils_36014d0d41bf.js"></script>
+  <script src="assets/control_utils_9e5c75c85824.js"></script>
+  <script src="assets/drawing_utils_3955d5dc8a47.js"></script>
+  <script src="assets/hands_dec1b630eb63.js"></script>
+  <!-- Three.js & PostProcessing -->
+  <script async="" src="assets/es-module-shims_ffb4a927f283.js"></script>
+  <script type="importmap">
+{
+"imports": {
+"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}
+}
+</script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #030305;
+      color: white;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      outline: none;
+    }
+
+    .sci-panel {
+      background: rgba(10, 10, 12, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Subtle scanline effect */
+    .scanlines {
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.06) 50%, rgba(0, 0, 0, 0.06));
+      background-size: 100% 4px;
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.8) 120%);
+    }
+
+    /* Custom UI Elements */
+    .btn-icon {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-icon:active {
+      transform: scale(0.95);
+    }
+
+    /* Loading Animation */
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: scale(2.2);
+        opacity: 0;
+      }
+    }
+
+    .loader-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid white;
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+  </style>
+  <style data-scroll-fix="true">
+    /* Scroll fixes for offline viewing */
+    html,
+    body {
+      overflow: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      min-height: 100% !important;
+      scroll-behavior: auto !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    /* Force visibility - many sites use JS animations for initial display */
+    body,
+    .wrapper,
+    main,
+    #__next,
+    #app,
+    .page,
+    .content {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: none !important;
+    }
+
+    /* Disable loader/preloader overlays */
+    .loader,
+    .preloader,
+    .loading,
+    [class*="loader"],
+    [class*="preloader"] {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
+    /* Show elements that might be hidden for animation */
+    .word-inner,
+    .char,
+    .line,
+    [data-aos],
+    [data-scroll],
+    .hero-text span,
+    .hero-fade,
+    [class*="hero"] span {
+      opacity: 1 !important;
+      transform: none !important;
+      visibility: visible !important;
+    }
+
+    /* Reset Tailwind animation utility classes */
+    .translate-y-full,
+    .translate-x-full,
+    .-translate-y-full,
+    .-translate-x-full,
+    .translate-y-1\/2,
+    .-translate-y-1\/2,
+    .translate-y-\[100\%\],
+    .translate-y-\[110\%\] {
+      transform: none !important;
+    }
+
+    /* Force visibility on common hidden-for-animation patterns */
+    .opacity-0,
+    [class*="opacity-0"] {
+      opacity: 1 !important;
+    }
+
+    /* Reset scale transforms used for animations */
+    .scale-0,
+    .scale-50,
+    .scale-75 {
+      transform: none !important;
+    }
+
+    html.lenis,
+    html.lenis-smooth,
+    body.lenis,
+    body.lenis-smooth,
+    .lenis-wrapper,
+    .lenis-content,
+    [data-lenis-prevent],
+    [data-scroll-container] {
+      overflow: visible !important;
+      height: auto !important;
+    }
+
+    /* Fix flex containers that might cut off content */
+    body.flex.items-center,
+    body.flex.justify-center {
+      align-items: flex-start !important;
+      min-height: 100vh;
+      height: auto !important;
+    }
+
+    /* Ensure main content scrolls */
+    main,
+    #__next,
+    #__nuxt,
+    #app,
+    .main-content {
+      overflow: visible !important;
+      height: auto !important;
+    }
+  </style>
+
+
+  <style>
+    body {
+      margin: 0;
+
+      background-color: #030305;
+      color: white;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      outline: none;
+    }
+
+    .sci-panel {
+      background: rgba(10, 10, 12, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Subtle scanline effect */
+    .scanlines {
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.06) 50%, rgba(0, 0, 0, 0.06));
+      background-size: 100% 4px;
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.8) 120%);
+    }
+
+    /* Custom UI Elements */
+    .btn-icon {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-icon:active {
+      transform: scale(0.95);
+    }
+
+    /* Loading Animation */
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: scale(2.2);
+        opacity: 0;
+      }
+    }
+
+    .loader-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid white;
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+  </style>
+</head>
+
+<body class="antialiased text-neutral-200 bg-[#0b0b0c] h-full"
+  style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial">
+  <!-- Post-FX -->
+  <div class="scanlines" style="position:fixed; z-index:-10;pointer-events:none;"></div>
+  <div class="vignette" style="position:fixed; z-index:-10;pointer-events:none;"></div>
+  <!-- Main Canvas -->
+  <div class="fixed inset-0" style="z-index: -20;" id="canvas-container"></div>
+  <!-- UI: Header / HUD -->
+  <header
+    class="fixed top-16 left-0 w-full p-4 md:p-6 z-[19] flex flex-row justify-between items-start pointer-events-none">
+    <!-- Left: Branding & Stats -->
+    <div class="flex flex-col gap-2 pointer-events-auto">
+      <div class="flex items-center gap-3">
+        <div class="relative w-2 h-2">
+          <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
+          <div class="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+        </div>
+        <h1 class="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90">Aether<span
+            class="opacity-40">.OS</span></h1>
+      </div>
+      <div
+        class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4 text-[10px] font-mono text-sci-dim tracking-wider">
+        <span class="text-white/70 transition-colors duration-500" id="sim-mode">NEBULA CLOUD</span>
+        <span class="hidden xs:inline w-px h-2 bg-white/10"></span>
+        <span class="opacity-60" id="particle-count">120K NODES</span>
+      </div>
+    </div>
+    <!-- Right: Actions -->
+    <div class="flex gap-2 pointer-events-auto">
+      <button aria-label="Microphone"
+        class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group"
+        id="btn-audio">
+        <i class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors" data-lucide="mic"></i>
+      </button>
+      <button aria-label="Camera"
+        class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group relative overflow-hidden"
+        id="btn-cam">
+        <i class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors z-10 relative"
+          data-lucide="video"></i>
+        <div class="absolute inset-0 bg-emerald-500/10 opacity-0 transition-opacity" id="cam-active-indicator"></div>
+      </button>
+      <button aria-label="Capture"
+        class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group"
+        id="btn-rec">
+        <i class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors" data-lucide="aperture"></i>
+      </button>
+    </div>
+  </header>
+  <!-- UI: Camera Preview (Hidden but functional) -->
+  <video class="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none z-[-1]" id="input-video"
+    playsinline=""></video>
+  <!-- UI: Bottom Controls Area -->
+  <div
+    class="fixed bottom-0 left-0 w-full z-20 pointer-events-none p-4 md:p-6 flex flex-col md:flex-row justify-between items-end gap-4">
+    <!-- Left: Mode Selector -->
+    <div
+      class="sci-panel p-3 rounded-xl pointer-events-auto w-full md:w-64 max-w-[300px] backdrop-blur-xl border border-white/5">
+      <div class="flex justify-between items-center mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <i class="w-3 h-3 text-white/40" data-lucide="cpu"></i>
+          <span class="text-[10px] font-medium uppercase tracking-widest text-white/50">Simulation</span>
+        </div>
+        <!-- Gesture Status Indicator -->
+        <div
+          class="opacity-0 transition-opacity duration-300 flex items-center gap-1.5 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20"
+          id="hand-status">
+          <div class="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span class="text-[9px] font-mono text-emerald-400 tracking-tight">TRACKING</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-1.5">
+        <button
+          class="mode-btn active group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 text-left"
+          onclick="window.setMode(0)">
+          <span class="text-[10px] text-white/80 group-hover:text-white font-medium">Nebula</span>
+          <span class="text-[9px] font-mono text-white/30">01</span>
+          <div
+            class="absolute inset-0 border border-white/10 rounded-lg opacity-0 group-[.active]:opacity-100 pointer-events-none">
+          </div>
+        </button>
+        <button
+          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+          onclick="window.setMode(1)">
+          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Torus</span>
+          <span class="text-[9px] font-mono text-white/20">02</span>
+        </button>
+        <button
+          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+          onclick="window.setMode(2)">
+          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Lattice</span>
+          <span class="text-[9px] font-mono text-white/20">03</span>
+        </button>
+        <button
+          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+          onclick="window.setMode(3)">
+          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Vortex</span>
+          <span class="text-[9px] font-mono text-white/20">04</span>
+        </button>
+      </div>
+    </div>
+    <!-- Right: Color & Info -->
+    <div class="flex flex-row md:flex-col items-center md:items-end gap-3 pointer-events-auto">
+      <!-- Palette Switcher -->
+      <div class="sci-panel p-1.5 rounded-full flex md:flex-col flex-row gap-2">
+        <button
+          class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
+          onclick="window.cycleColor(0)"></button>
+        <button
+          class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
+          onclick="window.cycleColor(1)"></button>
+        <button
+          class="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
+          onclick="window.cycleColor(2)"></button>
+      </div>
+      <div class="hidden md:block text-[9px] font-mono text-right text-white/20 leading-tight">
+        <p>INTERACTION ENGINE V2.0</p>
+        <p class="mt-0.5">SAYANTAN BARIK</p>
+      </div>
+    </div>
+  </div>
+  <!-- Loader -->
+  <div
+    class="fixed inset-0 z-50 bg-[#030305] flex flex-col items-center justify-center transition-opacity duration-1000 pointer-events-none"
+    id="loader">
+    <div class="relative w-12 h-12 mb-6">
+      <div class="loader-ring"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+      </div>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+      <div class="text-[10px] font-mono tracking-[0.3em] text-white/50 uppercase">Loading Assets</div>
+      <div class="w-24 h-px bg-white/10 relative overflow-hidden">
+        <div class="absolute inset-y-0 left-0 w-1/2 bg-white/40 animate-[slide_1s_infinite_linear]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Header -->
+  <nav class="relative border-b backdrop-blur-sm border-white/10 bg-black/20 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a class="text-lg font-semibold text-white tracking-tight font-geist" href="#">TD</a>
+        </div>
+        <!-- Navigation Links -->
+        <div class="hidden md:flex space-x-8 items-center">
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="#about">Sobre</a>
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist"
+            href="portfolio.html">Portfólio</a>
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="#services">Serviços</a>
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="#contact">Contato</a>
+        </div>
+        <!-- CTA Button -->
+        <div class="flex items-center">
+          <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10"
+            href="#contact">
+            <svg aria-hidden="true" class="lucide lucide-send h-4 w-4" data-lucide="send" fill="none" height="24"
+              stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"
+              width="24" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z">
+              </path>
+              <path d="m21.854 2.147-10.94 10.939"></path>
+            </svg>
+            <span class="hidden sm:inline font-geist">Falar comigo</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- Hero Section -->
+  <header class="sm:px-6 lg:px-8 md:pt-16 max-w-7xl mr-auto ml-auto pt-10 pr-4 pl-4" id="about">
+    <div
+      class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-3 py-1.5 shadow-sm backdrop-blur border-white/10">
+      <svg aria-hidden="true" class="lucide lucide-badge-check h-4 w-4 text-emerald-400" data-lucide="badge-check"
+        fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z">
+        </path>
+        <path d="m9 12 2 2 4-4"></path>
+      </svg>
+      <span class="text-[13px] leading-none text-neutral-300 font-geist">Especialista em Performance Digital</span>
+    </div>
+    <h1 class="sm:text-5xl lg:text-6xl text-4xl tracking-tighter font-geist mt-6 text-neutral-100">Tony (Decristony), <span
+        class="tracking-tighter font-geist text-emerald-400">Web Designer Dev</span></h1>
+    <p class="mt-3 text-base sm:text-lg max-w-3xl font-geist text-neutral-400">
+      Crio sites rápidos, estratégicos e pensados para gerar resultado real.<br>
+      👉 Do design à conversão: tudo focado no crescimento do seu projeto.
+    </p>
+    <div class="mt-6 flex gap-4">
+      <a href="portfolio.html" class="inline-flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-500/10 px-6 py-2.5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all">Ver Projetos</a>
+      <a href="#contact" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all">Falar comigo</a>
+    </div>
+  </header>
+  <main class="md:mt-12 mt-8">
+    <div class="sm:px-6 lg:px-8 max-w-7xl mr-auto ml-auto pr-4 pl-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <!-- Left: Profile Card -->
+        <section
+          class="relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10">
+          <div class="p-3 sm:p-4">
+            <div class="relative rounded-2xl overflow-hidden ring-1 bg-neutral-900 ring-white/10">
+              <img alt="Portrait" class="sm:h-80 w-full h-64 object-cover"
+                src="assets/aee7c414-1804-47c8-ae06-d2543a_ac56c5b38ecc.jpg" />
+              <div
+                class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full px-2.5 py-1.5 ring-1 backdrop-blur bg-black/60 ring-white/10">
+                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[12px] font-geist text-neutral-200">Disponível para projetos</span>
+              </div>
+            </div>
+            <div class="sm:px-1 pr-2 pl-2">
+              <h2 class="text-2xl tracking-tighter font-geist mt-4 text-neutral-100">
+                Olá, <span
+                  class="bg-clip-text text-transparent tracking-tighter font-geist bg-gradient-to-r from-emerald-400 to-cyan-400">Tony
+                  (Decristony)</span>
+              </h2>
+              <p class="text-sm text-neutral-400 font-geist mt-1">Web designer e desenvolvedor com mais de 4 anos de exp, atuando na criação de soluções digitais de alto impacto.</p>
+              <div class="mt-4 flex items-center gap-2.5">
+                <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
+                  href="#">
+                  <svg aria-hidden="true" class="lucide lucide-twitter h-4 w-4 group-hover:text-white text-neutral-300"
+                    data-lucide="twitter" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path class=""
+                      d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z">
+                    </path>
+                  </svg>
+                </a>
+                <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
+                  href="#">
+                  <svg aria-hidden="true" class="lucide lucide-instagram group-hover:text-white w-[16px] h-[16px]"
+                    data-icon-replaced="true" data-lucide="instagram" fill="none" height="24" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    style="color: rgb(255, 255, 255); width: 16px; height: 16px" viewbox="0 0 24 24" width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <rect height="20" rx="5" ry="5" width="20" x="2" y="2"></rect>
+                    <path class="" d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                  </svg>
+                </a>
+                <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
+                  href="#">
+                  <svg aria-hidden="true" class="lucide lucide-dribbble group-hover:text-white w-[16px] h-[16px]"
+                    data-icon-replaced="true" data-lucide="dribbble" fill="none" height="24" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    style="color: rgb(255, 255, 255); width: 16px; height: 16px;" viewbox="0 0 24 24" width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <circle class="" cx="12" cy="12" r="10"></circle>
+                    <path class="" d="M19.13 5.09C15.22 9.14 10 10.44 2.25 10.94"></path>
+                    <path d="M21.75 12.84c-6.62-1.41-12.14 1-16.38 6.32"></path>
+                    <path class="" d="M8.56 2.75c4.37 6 6 9.42 8 17.72"></path>
+                  </svg>
+                </a>
+                <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
+                  href="#">
+                  <svg aria-hidden="true" class="lucide lucide-github group-hover:text-white w-[16px] h-[16px]"
+                    data-icon-replaced="true" data-lucide="github" fill="none" height="24" stroke="currentColor"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    style="color: rgb(255, 255, 255); width: 16px; height: 16px;" viewbox="0 0 24 24" width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path class=""
+                      d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                    </path>
+                    <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                  </svg>
+                </a>
+              </div>
+              <div class="my-5 h-px bg-gradient-to-r to-transparent from-white/10 via-white/5"></div>
+              <div class="mb-2">
+                <a class="inline-flex items-center gap-2 hover:shadow-lg transition text-sm font-medium text-black font-geist bg-white rounded-full pt-2.5 pr-4 pb-2.5 pl-4 shadow"
+                  href="#contact">
+                  <svg aria-hidden="true" class="lucide lucide-send h-4 w-4" data-lucide="send" fill="none" height="24"
+                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z">
+                    </path>
+                    <path d="m21.854 2.147-10.94 10.939"></path>
+                  </svg>
+                  Falar no WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Right: About + Skills + Experience -->
+        <section
+          class="sm:p-6 border-white/10 border rounded-3xl pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] backdrop-blur-lg">
+          <p class="text-base text-neutral-300 font-geist">Web Designer e Desenvolvedor Front-end focado na criação de experiências digitais que unem estética, performance e usabilidade.</p>
+          <div class="mt-6 h-px bg-gradient-to-r to-transparent from-white/10 via-white/5"></div>
+          <!-- Skills -->
+          <div class="flex flex-wrap mt-6 gap-x-2.5 gap-y-2.5">
+            <span
+              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">WordPress & WooCommerce</span>
+            <span
+              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">React & Next.js</span>
+            <span
+              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">PHP & Java</span>
+            <span
+              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">Tailwind CSS</span>
+            <span
+              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3"
+              style="mask-image: linear-gradient(100deg, transparent, black 0%, black 100%, transparent); -webkit-mask-image: linear-gradient(100deg, transparent, black 0%, black 100%, transparent);">Photoshop (Avançado)</span><span
+              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">Tráfego Pago & UX/UI</span>
+          </div>
+          <div class="mt-6 h-px bg-gradient-to-r to-transparent from-white/10 via-white/5"></div>
+          <!-- Experience -->
+          <div class="mt-6 space-y-3">
+            <div
+              class="group flex transition hover:bg-black/30 bg-black/20 border-white/10 border rounded-2xl pt-4 pr-4 pb-4 pl-4 shadow-sm items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="h-7 w-7 rounded-full ring-1 flex items-center justify-center bg-emerald-400/10 ring-emerald-400/20">
+                  <svg aria-hidden="true" class="lucide lucide-briefcase w-[14px] h-[14px]" data-icon-replaced="true"
+                    data-lucide="briefcase" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2" style="color: rgb(52, 211, 153); width: 14px; height: 14px"
+                    viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <path class="" d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    <rect class="" height="14" rx="2" width="20" x="2" y="6"></rect>
+                  </svg>
+                </div>
+                <div class="">
+                  <p class="text-sm font-medium text-neutral-200 tracking-tight font-geist">Web Designer & Desenvolvedor</p>
+                  <p class="text-xs text-neutral-400 font-geist">Sites responsivos, e-commerce, automação</p>
+                </div>
+              </div>
+              <span class="text-xs text-neutral-400 font-geist">2019-Atual</span>
+            </div>
+            <div
+              class="group flex transition hover:bg-black/30 bg-black/20 border-white/10 border rounded-2xl pt-4 pr-4 pb-4 pl-4 shadow-sm items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="h-7 w-7 rounded-full ring-1 flex items-center justify-center bg-cyan-400/10 ring-cyan-400/20">
+                  <svg aria-hidden="true" class="lucide lucide-layout h-3.5 w-3.5 text-cyan-400" data-lucide="layout"
+                    fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <rect height="18" rx="2" width="18" x="3" y="3"></rect>
+                    <path d="M3 9h18"></path>
+                    <path d="M9 21V9"></path>
+                  </svg>
+                </div>
+                <div class="">
+                  <p class="text-sm font-medium text-neutral-200 tracking-tight font-geist">Instrutor de Photoshop</p>
+                  <p class="text-xs text-neutral-400 font-geist">Edição, design e manipulação PRO</p>
+                </div>
+              </div>
+              <span class="text-xs text-neutral-400 font-geist">Cursos</span>
+            </div>
+            <div
+              class="group flex transition hover:bg-black/30 bg-black/20 border-white/10 border rounded-2xl pt-4 pr-4 pb-4 pl-4 shadow-sm items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="h-7 w-7 rounded-full ring-1 flex items-center justify-center bg-fuchsia-400/10 ring-fuchsia-400/20">
+                  <svg aria-hidden="true" class="lucide lucide-package h-3.5 w-3.5 text-fuchsia-400"
+                    data-lucide="package" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z">
+                    </path>
+                    <path d="M12 22V12"></path>
+                    <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                    <path d="m7.5 4.27 9 5.15"></path>
+                  </svg>
+                </div>
+                <div class="">
+                  <p class="text-sm font-medium text-neutral-200 tracking-tight font-geist">Resultados / Performance</p>
+                  <p class="text-xs text-neutral-400 font-geist">Carregamento de sites < 500ms</p>
+                </div>
+              </div>
+              <span class="text-xs text-neutral-400 font-geist">Métrica</span>
+            </div>
+            <div
+              class="group rounded-2xl border px-4 py-4 flex items-center justify-between shadow-sm transition border-white/10 bg-black/20 hover:bg-black/30">
+              <div class="flex items-center gap-3">
+                <div
+                  class="h-7 w-7 rounded-full ring-1 flex items-center justify-center bg-amber-400/10 ring-amber-400/20">
+                  <svg aria-hidden="true" class="lucide lucide-palette h-3.5 w-3.5 text-amber-400" data-lucide="palette"
+                    fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z">
+                    </path>
+                    <circle cx="13.5" cy="6.5" fill="currentColor" r=".5"></circle>
+                    <circle cx="17.5" cy="10.5" fill="currentColor" r=".5"></circle>
+                    <circle cx="6.5" cy="12.5" fill="currentColor" r=".5"></circle>
+                    <circle cx="8.5" cy="7.5" fill="currentColor" r=".5"></circle>
+                  </svg>
+                </div>
+                <div class="">
+                  <p class="text-sm font-medium text-neutral-200 tracking-tight font-geist">Especialista em Ad Creatives</p>
+                  <p class="text-xs text-neutral-400 font-geist">Criativos de alta conversão</p>
+                </div>
+              </div>
+              <span class="text-xs text-neutral-400 font-geist">Otimizado</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <!-- Automatic Carousel Video Loop Section -->
+    <div class="sm:px-6 lg:px-8 max-w-7xl mr-auto ml-auto pr-4 pl-4">
+      <!-- Services Section -->
+      <section class="mt-20 md:mt-32" id="services">
+        <div class="text-center mb-12">
+          <div
+            class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-3 py-1.5 shadow-sm backdrop-blur mb-6 border-white/10">
+            <svg aria-hidden="true" class="lucide lucide-sparkles h-4 w-4 text-cyan-400" data-lucide="sparkles"
+              fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path class=""
+                d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z">
+              </path>
+              <path d="M20 2v4"></path>
+              <path d="M22 4h-4"></path>
+              <circle cx="4" cy="20" r="2"></circle>
+            </svg>
+            <span class="text-[13px] leading-none text-neutral-300 font-geist">Serviços</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-geist tracking-tighter text-neutral-100" style="">
+            Meus <span class="font-geist tracking-tighter text-emerald-300" style="">Serviços</span>
+          </h2>
+          <p class="sm:text-lg text-base text-neutral-400 font-geist max-w-2xl mt-3 mr-auto ml-auto">Criação de Websites e Lojas Virtuais. Sites modernos, responsivos e focados em conversão, otimizados para vendas, e integração de IA para maximizar desempenho.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 gap-x-6 gap-y-6">
+          <!-- Card 1: Website Design (taller) -->
+          <div
+            class="relative sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] ring-1 ring-white/[0.04] lg:row-span-2 overflow-hidden border rounded-3xl pt-5 pr-5 pb-5 pl-5 backdrop-blur-lg border-white/10">
+            <div class="absolute inset-0 pointer-events-none">
+              <div class="absolute -bottom-40 -left-24 h-72 w-72 rounded-full blur-[120px] bg-cyan-400/10"></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="h-9 w-9 rounded-xl border flex items-center justify-center border-white/10 bg-white/5">
+                <svg aria-hidden="true" class="lucide lucide-layout-dashboard h-5 w-5 text-white/80"
+                  data-lucide="layout-dashboard" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <rect height="9" rx="1" width="7" x="3" y="3"></rect>
+                  <rect height="5" rx="1" width="7" x="14" y="3"></rect>
+                  <rect height="9" rx="1" width="7" x="14" y="12"></rect>
+                  <rect height="5" rx="1" width="7" x="3" y="16"></rect>
+                </svg>
+              </div>
+              <h3 class="sm:text-2xl text-xl text-white tracking-tighter font-geist">Criação de Websites Profissionais</h3>
+            </div>
+            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3">Sites modernos, responsivos e focados em conversão. Otimização de performance & SEO para alcance orgânico e melhor posicionamento.</p>
+            <div class="mt-5 rounded-2xl overflow-hidden border border-white/10 bg-black/30">
+              <img alt="Website design showcase" class="aspect-video w-full object-cover"
+                src="assets/bf072b5e-1c5d-4961-91f2-3bf3e6_ad5ec1651e2b.png" />
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-3">
+              <img alt="UI concept" class="aspect-[4/3] w-full object-auto border-white/10 border rounded-xl"
+                src="assets/fe3f0a32-f06a-4127-bacc-518b40_1a4d3860a708.png" />
+              <img alt="Interface detail" class="aspect-[4/3] w-full object-auto border-white/10 border rounded-xl"
+                src="assets/92587f9e-68b7-4ea4-a715-d23c51_6f062d8fa9ea.png" />
+              <img alt="Product view" class="aspect-[4/3] w-full object-auto border-white/10 border rounded-xl"
+                src="assets/ef67e32e-3b97-4efd-ac43-70b1bb_e34a8ceea5dd.png" />
+            </div>
+          </div>
+          <!-- Card 2: Logo Systems -->
+          <div
+            class="sm:p-6 border-white/10 border ring-1 rounded-3xl pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg">
+            <div class="flex items-center gap-3">
+              <div class="h-9 w-9 rounded-xl border flex items-center justify-center border-white/10 bg-white/5">
+                <svg aria-hidden="true" class="lucide lucide-pen-tool h-5 w-5 text-white/80" data-lucide="pen-tool"
+                  fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z">
+                  </path>
+                  <path
+                    d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18">
+                  </path>
+                  <path d="m2.3 2.3 7.286 7.286"></path>
+                  <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-geist tracking-tighter text-white" style="">E-commerce WP</h3>
+            </div>
+            <p class="mt-3 text-sm sm:text-base font-geist text-neutral-400">
+              Lojas completas com WooCommerce prontas para vender. Integração com IA, automação de processos e chatbots inteligentes para faturamento online.
+            </p>
+            <div class="mt-5 grid grid-cols-3 gap-3">
+              <div
+                class="col-span-1 flex bg-center bg-gradient-to-b from-white/5 to-white/0 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/ca46fa41-3b0d-4167-93fc-9b5228bcc0d2_800w.png)] bg-auto border-white/10 border rounded-2xl pt-4 pr-4 pb-4 pl-4 items-center justify-center">
+                <svg aria-hidden="true" class="lucide lucide-shapes w-[32px] h-[32px]" data-icon-replaced="true"
+                  data-lucide="shapes" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" style="color: rgb(229, 229, 229); width: 32px; height: 32px;"
+                  viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                  <path class=""
+                    d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z"></path>
+                  <rect class="" height="7" rx="1" width="7" x="3" y="14"></rect>
+                  <circle class="" cx="17.5" cy="17.5" r="3.5"></circle>
+                </svg>
+              </div>
+              <div
+                class="col-span-1 rounded-2xl border bg-gradient-to-b p-4 flex items-center justify-center border-white/10 from-white/5 to-white/0">
+                <svg aria-hidden="true" class="lucide lucide-beaker h-8 w-8 text-neutral-200" data-lucide="beaker"
+                  fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                  <path class="" d="M4.5 3h15"></path>
+                  <path class="" d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"></path>
+                  <path d="M6 14h12"></path>
+                </svg>
+              </div>
+              <div
+                class="col-span-1 rounded-2xl border bg-gradient-to-b p-4 flex items-center justify-center border-white/10 from-white/5 to-white/0">
+                <svg aria-hidden="true" class="lucide lucide-badge-check h-8 w-8 text-neutral-200"
+                  data-lucide="badge-check" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path class=""
+                    d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z">
+                  </path>
+                  <path d="m9 12 2 2 4-4"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <!-- Card 3: Prototype Design -->
+          <div
+            class="sm:p-6 border-white/10 border rounded-3xl ring-1 pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg">
+            <div class="flex gap-3 gap-x-3 gap-y-3 items-center">
+              <div class="h-9 w-9 rounded-xl border flex items-center justify-center border-white/10 bg-white/5">
+                <svg aria-hidden="true" class="lucide lucide-mouse-pointer-square-dashed h-5 w-5 text-white/80"
+                  data-lucide="mouse-pointer-square-dashed" fill="none" height="24" stroke="currentColor"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path class=""
+                    d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z">
+                  </path>
+                  <path d="M5 3a2 2 0 0 0-2 2"></path>
+                  <path class="" d="M19 3a2 2 0 0 1 2 2"></path>
+                  <path d="M5 21a2 2 0 0 1-2-2"></path>
+                  <path d="M9 3h1"></path>
+                  <path class="" d="M9 21h2"></path>
+                  <path d="M14 3h1"></path>
+                  <path d="M3 9v1"></path>
+                  <path d="M21 9v2"></path>
+                  <path d="M3 14v1"></path>
+                </svg>
+              </div>
+              <h3 class="sm:text-2xl text-xl text-white tracking-tighter font-geist">Design & Publicidade Digital</h3>
+            </div>
+            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3" style="">Criação de artes para redes sociais, criativos para anúncios (Facebook Ads / Google Ads), Identidade Visual e edição masterizada de imagens.</p>
+            <div class="mt-5 grid grid-cols-3 gap-3">
+              <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/30">
+                <img alt="Prototype 1" class="aspect-[4/3] w-full object-cover"
+                  src="assets/e3cdd41d-fb56-44c5-a49c-63a02e_f75b64518702.jpg" />
+              </div>
+              <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/30">
+                <img alt="Prototype 2" class="aspect-[4/3] w-full object-cover"
+                  src="assets/59e2de0e-1f59-4a87-90e5-3ac73a_29a7bea5fa12.png" />
+              </div>
+              <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/30">
+                <img alt="Prototype 3" class="aspect-[4/3] w-full object-cover"
+                  src="assets/32dcd344-e060-4889-80af-b42ecd_cbf125b4f53a.png" />
+              </div>
+            </div>
+          </div>
+          <!-- Card 4: Graphic Design (full width on lg) -->
+          <div
+            class="sm:p-6 lg:col-span-2 border-white/10 border ring-1 rounded-3xl pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg">
+            <div class="flex gap-3 gap-x-3 gap-y-3 items-center">
+              <div class="h-9 w-9 rounded-xl border flex items-center justify-center border-white/10 bg-white/5">
+                <svg aria-hidden="true" class="" data-icon-replaced="true" data-icon-set="lucide"
+                  data-lucide="sun-medium" fill="none" height="20" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" style="color: rgb(255, 255, 255);" viewbox="0 0 24 24"
+                  width="20" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 3v1"></path>
+                  <path d="M12 20v1"></path>
+                  <path d="M3 12h1"></path>
+                  <path d="M20 12h1"></path>
+                  <path d="m18.364 5.636-.707.707"></path>
+                  <path d="m6.343 17.657-.707.707"></path>
+                  <path d="m5.636 5.636.707.707"></path>
+                  <path d="m17.657 17.657.707.707"></path>
+                </svg>
+              </div>
+              <h3 class="sm:text-2xl text-xl text-white tracking-tighter font-geist">Design Systems & UX Avançado</h3>
+            </div>
+            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3">Padronização visual e escalabilidade para projetos maiores, economizando tempo e mantendo altíssima qualidade de conversão e fidelidade à marca.</p>
+            <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="rounded-2xl overflow-hidden border border-white/10">
+                <img alt="Poster graphic" class="aspect-[16/10] w-full object-cover"
+                  src="assets/571b81bf-f918-4895-9ce4-c712a9_276989e27624.jpg" />
+              </div>
+              <div class="rounded-2xl overflow-hidden border border-white/10">
+                <img alt="3D render" class="aspect-[16/10] w-full object-cover"
+                  src="assets/54794e3a-303a-4fdc-969b-620128_7e766bab6262.png" />
+              </div>
+              <div class="rounded-2xl overflow-hidden border border-white/10">
+                <img alt="Scenic minimal" class="aspect-[16/10] w-full object-cover"
+                  src="assets/8b1ab6e3-dbcb-43e1-a0d8-7e78f5_0161b7d39290.png" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Contact Section -->
+      <section class="mt-20 md:mt-32 mb-20" id="contact">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:p-6 border-white/10 border rounded-2xl pt-5 pr-5 pb-5 pl-5 backdrop-blur-lg gap-x-4 gap-y-4 items-start justify-between">
+          <div class="">
+            <h3 class="text-lg sm:text-xl font-semibold tracking-tight font-geist text-white">Dê o próximo passo</h3>
+            <p class="text-sm text-neutral-400 font-geist mt-1">Quer tirar um projeto do papel ou melhorar seus resultados de vendas hoje? Estou pronto para atuar.</p>
+          </div>
+          <a class="group inline-flex items-center gap-2 transition hover:bg-white/20 text-sm font-medium text-neutral-100 bg-white/10 border-white/10 border rounded-full pt-2 pr-4 pb-2 pl-4"
+            href="#">
+            <svg aria-hidden="true" class="lucide lucide-mail h-4 w-4" data-lucide="mail" fill="none" height="24"
+              stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"
+              width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
+              <rect class="" height="16" rx="2" width="20" x="2" y="4"></rect>
+            </svg>
+            <span class="font-geist">(61) 99672-5908</span>
+            <svg aria-hidden="true" class="lucide lucide-arrow-up-right h-4 w-4 opacity-80" data-lucide="arrow-up-right"
+              fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 7h10v10"></path>
+              <path d="M7 17 17 7"></path>
+            </svg>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+  <!-- Footer -->
+  <footer class="relative border-t backdrop-blur-sm border-white/10 bg-black/20">
+    <div class="sm:px-6 lg:px-8 max-w-7xl mr-auto ml-auto pt-12 pr-4 pb-12 pl-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-8">
+        <!-- Brand Column -->
+        <div class="md:col-span-2">
+          <h3 class="text-lg font-semibold tracking-tight font-geist mb-3 text-white">Tony (Decristony)</h3>
+          <p class="text-sm text-neutral-400 font-geist max-w-md mb-4">Perfil Completo: design + código + marketing. Visão estratégica de negócio usando IA para ganho máximo de resultados do cliente.</p>
+          <div class="flex gap-3 gap-x-3 gap-y-3 items-center">
+            <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-9 h-9 border-white/10 border rounded-full"
+              href="#">
+              <svg aria-hidden="true" class="lucide lucide-twitter h-4 w-4 group-hover:text-white text-neutral-300"
+                data-lucide="twitter" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z">
+                </path>
+              </svg>
+            </a>
+            <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-9 h-9 border-white/10 border rounded-full"
+              href="#">
+              <svg aria-hidden="true" class="lucide lucide-instagram h-4 w-4 group-hover:text-white text-neutral-300"
+                data-lucide="instagram" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                xmlns="http://www.w3.org/2000/svg">
+                <rect class="" height="20" rx="5" ry="5" width="20" x="2" y="2">
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                </rect>
+              </svg>
+            </a>
+            <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-9 h-9 border-white/10 border rounded-full"
+              href="#">
+              <svg aria-hidden="true" class="lucide lucide-dribbble h-4 w-4 group-hover:text-white text-neutral-300"
+                data-lucide="dribbble" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M19.13 5.09C15.22 9.14 10 10.44 2.25 10.94"></path>
+                <path d="M21.75 12.84c-6.62-1.41-12.14 1-16.38 6.32"></path>
+                <path d="M8.56 2.75c4.37 6 6 9.42 8 17.72"></path>
+              </svg>
+            </a>
+            <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-9 h-9 border-white/10 border rounded-full"
+              href="#">
+              <svg aria-hidden="true" class="lucide lucide-github h-4 w-4 group-hover:text-white text-neutral-300"
+                data-lucide="github" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path class=""
+                  d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                </path>
+                <path d="M9 18c-4.51 2-5-2-7-2"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <!-- Services Column -->
+        <div class="">
+          <h4 class="text-sm font-medium mb-3 font-geist text-white">Soft / Hard Skills</h4>
+          <ul class="text-sm text-neutral-400 space-y-2">
+            <li class=""><a class="transition hover:text-white font-geist" href="#services">Web Designer (WP, Code)</a></li>
+            <li class=""><a class="transition font-geist hover:text-white" href="#services">Tráfego & Ecommerce</a></li>
+            <li class=""><a class="transition font-geist hover:text-white" href="#services">UX / UI / Landing Pages</a></li>
+            <li class=""><a class="transition font-geist hover:text-white" href="#">Ad Creatives & IA</a></li>
+          </ul>
+        </div>
+        <!-- Contact Column -->
+        <div class="">
+          <h4 class="text-sm font-medium mb-3 font-geist text-white">Contact</h4>
+          <ul class="space-y-2 text-sm text-neutral-400">
+            <li class=""><a class="transition hover:text-white font-geist" href="#">decristony@gmail.com</a></li>
+            <li class=""><a class="transition hover:text-white font-geist" href="#">(61) 99672-5908</a></li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="flex flex-col sm:flex-row gap-4 border-white/10 border-t mt-8 pt-8 gap-x-4 gap-y-4 items-center justify-between">
+        <p class="text-xs font-geist text-neutral-400">© 2026 Tony (Decristony) — Todos os direitos reservados. Design, código e estratégia no mesmo lugar 🚀</p>
+        &lt;
+      </div>
+    </div>
+  </footer>
+  <script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+    // --- CONFIGURATION ---
+    const isMobile = window.innerWidth < 768;
+    const CONFIG = {
+      particleCount: isMobile ? 65000 : 120000,
+      cameraZ: isMobile ? 40 : 28,
+      bgColor: 0x030305
+    };
+
+    // --- STATE ---
+    const STATE = {
+      mouse: new THREE.Vector2(0, 0),
+      hands: {
+        active: false,
+        left: { pos: new THREE.Vector3(-100, 0, 0), target: new THREE.Vector3(-100, 0, 0), state: 0 },
+        right: { pos: new THREE.Vector3(100, 0, 0), target: new THREE.Vector3(100, 0, 0), state: 0 },
+      },
+      mode: 0,
+      targetMode: 0,
+      audioLevel: 0,
+      time: 0,
+      colorPalette: 0
+    };
+
+    // --- SCENE SETUP ---
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({
+      antialias: false,
+      powerPreference: "high-performance",
+      alpha: false,
+      stencil: false,
+      depth: true
+    });
+
+    // Optimize pixel ratio for smoothness
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.CineonToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(CONFIG.bgColor, 0.015);
+    scene.background = new THREE.Color(CONFIG.bgColor);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.z = CONFIG.cameraZ;
+
+    // --- POST PROCESSING ---
+    const renderScene = new RenderPass(scene, camera);
+
+    // Smoother, dreamier bloom
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0.1;
+    bloomPass.strength = 1.0;
+    bloomPass.radius = 0.8;
+
+    // Custom Shader for Chromatic Aberration & Grain
+    const outputShader = {
+      uniforms: {
+        "tDiffuse": { value: null },
+        "uTime": { value: 0 },
+        "uRGBShift": { value: 0.002 }
+      },
+      vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+      fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float uTime;
+                uniform float uRGBShift;
+                varying vec2 vUv;
+                
+                float random(vec2 p) {
+                    return fract(sin(dot(p.xy, vec2(12.9898, 78.233))) * 43758.5453);
+                }
+
+                void main() {
+                    vec2 uv = vUv;
+                    
+                    // Chromatic aberration at edges
+                    float dist = distance(uv, vec2(0.5));
+                    vec2 offset = (uv - 0.5) * dist * uRGBShift;
+                    
+                    float r = texture2D(tDiffuse, uv + offset).r;
+                    float g = texture2D(tDiffuse, uv).g;
+                    float b = texture2D(tDiffuse, uv - offset).b;
+                    
+                    vec3 color = vec3(r, g, b);
+                    
+                    // Subtle film grain
+                    float noise = (random(uv + uTime) - 0.5) * 0.04;
+                    color += noise;
+                    
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+    };
+
+    const finalPass = new ShaderPass(outputShader);
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+    composer.addPass(finalPass);
+
+    // --- PARTICLE SYSTEM ---
+    const particleVertexShader = `
+            uniform float uTime;
+            uniform float uMode;
+            uniform vec3 uHandLeft;
+            uniform vec3 uHandRight;
+            uniform float uHandLeftState;
+            uniform float uHandRightState;
+            uniform float uAudio;
+            
+            attribute vec3 aRandom;
+            attribute float aIndex;
+
+            varying vec3 vColor;
+            varying float vAlpha;
+            varying float vDist;
+
+            // Simplex Noise
+            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+            float snoise(vec3 v) {
+                const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+                const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+                vec3 i  = floor(v + dot(v, C.yyy) );
+                vec3 x0 = v - i + dot(i, C.xxx) ;
+                vec3 g = step(x0.yzx, x0.xyz);
+                vec3 l = 1.0 - g;
+                vec3 i1 = min( g.xyz, l.zxy );
+                vec3 i2 = max( g.xyz, l.zxy );
+                vec3 x1 = x0 - i1 + C.xxx;
+                vec3 x2 = x0 - i2 + C.yyy;
+                vec3 x3 = x0 - D.yyy;
+                i = mod289(i);
+                vec4 p = permute( permute( permute(
+                            i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                        + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                        + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+                float n_ = 0.142857142857;
+                vec3  ns = n_ * D.wyz - D.xzx;
+                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                vec4 x_ = floor(j * ns.z);
+                vec4 y_ = floor(j - 7.0 * x_ );
+                vec4 x = x_ *ns.x + ns.yyyy;
+                vec4 y = y_ *ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+                vec4 b0 = vec4( x.xy, y.xy );
+                vec4 b1 = vec4( x.zw, y.zw );
+                vec4 s0 = floor(b0)*2.0 + 1.0;
+                vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+                vec3 p0 = vec3(a0.xy,h.x);
+                vec3 p1 = vec3(a0.zw,h.y);
+                vec3 p2 = vec3(a1.xy,h.z);
+                vec3 p3 = vec3(a1.zw,h.w);
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+            }
+
+            // --- Shapes ---
+            vec3 getPosSphere(float idx) {
+                float phi = acos( -1.0 + ( 2.0 * idx ) / ${CONFIG.particleCount}.0 );
+                float theta = sqrt( ${CONFIG.particleCount}.0 * 3.1415926 ) * phi;
+                float r = 12.0 + aRandom.x * 2.0;
+                return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi));
+            }
+
+            vec3 getPosTorus(float idx) {
+                float t = idx * 0.1;
+                float r = 10.0 + aRandom.y * 3.0;
+                float tube = 3.0 + aRandom.x * 2.0;
+                float angle = (idx / ${CONFIG.particleCount}.0) * 6.28 * 15.0;
+                return vec3(
+                    (r + tube * cos(angle)) * cos(t),
+                    (r + tube * cos(angle)) * sin(t),
+                    tube * sin(angle)
+                );
+            }
+
+            vec3 getPosLattice(float idx) {
+                float size = 25.0;
+                float step = pow(${CONFIG.particleCount}.0, 1.0/3.0);
+                float x = mod(idx, step);
+                float y = mod(floor(idx/step), step);
+                float z = floor(idx/(step*step));
+                return (vec3(x, y, z) / step - 0.5) * size;
+            }
+
+            vec3 getPosVortex(float idx) {
+                float r = (idx / ${CONFIG.particleCount}.0) * 18.0;
+                float ang = r * 3.0;
+                float h = (aRandom.x - 0.5) * 8.0 * (1.0 - r/20.0);
+                return vec3(r * cos(ang), r * sin(ang), h);
+            }
+
+            // --- Blending ---
+            vec3 blend(vec3 p1, vec3 p2, float t) {
+                return mix(p1, p2, smoothstep(0.0, 1.0, t));
+            }
+
+            void main() {
+                // Slow fluid movement
+                float t = uTime * 0.15; 
+                vec3 pos = vec3(0.0);
+                
+                // Mode Interpolation
+                float m = uMode; 
+                vec3 pSphere = getPosSphere(aIndex);
+                vec3 pTorus = getPosTorus(aIndex);
+                vec3 pLattice = getPosLattice(aIndex);
+                vec3 pVortex = getPosVortex(aIndex);
+
+                // Add noise to base shapes for organic feel
+                vec3 noiseBase = vec3(
+                    snoise(vec3(aIndex*0.01, t*0.2, 0.0)),
+                    snoise(vec3(aIndex*0.01, 0.0, t*0.2)),
+                    snoise(vec3(0.0, aIndex*0.01, t*0.2))
+                );
+
+                pSphere += noiseBase * 4.0;
+                pTorus += noiseBase * 2.0;
+                pLattice += noiseBase * 1.5;
+                pVortex += noiseBase * 2.0;
+
+                // Animate rotation for Torus
+                float c = cos(t*0.3); float s = sin(t*0.3);
+                pTorus.xy = mat2(c, -s, s, c) * pTorus.xy;
+                pTorus.xz = mat2(c, -s, s, c) * pTorus.xz;
+
+                // Animate Vortex
+                float va = t * 1.0 - length(pVortex.xy)*0.2;
+                float vc = cos(va); float vs = sin(va);
+                pVortex.xy = mat2(vc, -vs, vs, vc) * pVortex.xy;
+
+                // Mix based on mode
+                if(m <= 0.0) pos = pSphere;
+                else if(m <= 1.0) pos = mix(pSphere, pTorus, m);
+                else if(m <= 2.0) pos = mix(pTorus, pLattice, m - 1.0);
+                else if(m <= 3.0) pos = mix(pLattice, pVortex, m - 2.0);
+                else pos = pVortex;
+
+                // Audio reactivity
+                pos *= (1.0 + uAudio * 0.4);
+
+                // Hand Interaction (Soft Forces)
+                if (uHandLeft.x > -90.0) {
+                    float d = distance(pos, uHandLeft);
+                    float influence = smoothstep(12.0, 0.0, d);
+                    if (uHandLeftState < 0.0) { // Pinch - Pull
+                        pos = mix(pos, uHandLeft, influence * 0.3); 
+                    } else { // Open - Push/Displace
+                         pos += normalize(pos - uHandLeft) * influence * 8.0;
+                    }
+                }
+                
+                if (uHandRight.x < 90.0) {
+                    float d = distance(pos, uHandRight);
+                    float influence = smoothstep(12.0, 0.0, d);
+                    if (uHandRightState < 0.0) { // Pinch
+                        pos = mix(pos, uHandRight, influence * 0.3);
+                    } else { // Open
+                        pos += normalize(pos - uHandRight) * influence * 8.0;
+                    }
+                }
+
+                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                gl_PointSize = (1.5 + aRandom.y * 2.0 + uAudio * 5.0) * (30.0 / -mvPosition.z);
+                gl_Position = projectionMatrix * mvPosition;
+                
+                // Soft depth fade
+                vDist = length(pos);
+                float depthFade = smoothstep(60.0, 10.0, -mvPosition.z);
+                vAlpha = depthFade * (0.2 + aRandom.z * 0.6);
+                vColor = pos; 
+            }
+        `;
+
+    const particleFragmentShader = `
+            uniform vec3 uColor1;
+            uniform vec3 uColor2;
+            varying vec3 vColor;
+            varying float vAlpha;
+            varying float vDist;
+
+            void main() {
+                // Soft circular particle
+                vec2 center = gl_PointCoord - 0.5;
+                float dist = length(center);
+                if (dist > 0.5) discard;
+                
+                float glow = 1.0 - smoothstep(0.0, 0.5, dist);
+                glow = pow(glow, 1.5); // Soften edge
+
+                // Color gradient based on spatial position
+                vec3 col = mix(uColor1, uColor2, smoothstep(-20.0, 20.0, vColor.x + vColor.y));
+                
+                gl_FragColor = vec4(col, vAlpha * glow);
+            }
+        `;
+
+    // Geometry Setup
+    const geometry = new THREE.BufferGeometry();
+    const indices = new Float32Array(CONFIG.particleCount);
+    const randoms = new Float32Array(CONFIG.particleCount * 3);
+
+    for (let i = 0; i < CONFIG.particleCount; i++) {
+      indices[i] = i;
+      randoms[i * 3] = Math.random();
+      randoms[i * 3 + 1] = Math.random();
+      randoms[i * 3 + 2] = Math.random();
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(CONFIG.particleCount * 3).fill(0), 3));
+    geometry.setAttribute('aIndex', new THREE.BufferAttribute(indices, 1));
+    geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
+
+    const palettes = [
+      { c1: new THREE.Color('#818cf8'), c2: new THREE.Color('#2dd4bf') }, // Indigo / Teal
+      { c1: new THREE.Color('#f472b6'), c2: new THREE.Color('#60a5fa') }, // Pink / Blue
+      { c1: new THREE.Color('#fb923c'), c2: new THREE.Color('#e11d48') }, // Orange / Rose
+    ];
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uMode: { value: 0 },
+        uHandLeft: { value: new THREE.Vector3(-100, 0, 0) },
+        uHandRight: { value: new THREE.Vector3(100, 0, 0) },
+        uHandLeftState: { value: 0 },
+        uHandRightState: { value: 0 },
+        uAudio: { value: 0 },
+        uColor1: { value: palettes[0].c1 },
+        uColor2: { value: palettes[0].c2 }
+      },
+      vertexShader: particleVertexShader,
+      fragmentShader: particleFragmentShader,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    // --- AUDIO SYSTEM ---
+    let audioContext, analyser, dataArray;
+    const setupAudio = async () => {
+      if (audioContext) return;
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = audioContext.createMediaStreamSource(stream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 64;
+        analyser.smoothingTimeConstant = 0.8;
+        source.connect(analyser);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        const btn = document.getElementById('btn-audio');
+        btn.classList.add('bg-white/10', 'border-white/20');
+        btn.querySelector('i').classList.remove('text-white/60');
+        btn.querySelector('i').classList.add('text-emerald-400');
+      } catch (e) {
+        console.error("Audio denied", e);
+      }
+    };
+
+    // --- HAND TRACKING SYSTEM (Robust) ---
+    const initHandTracking = async () => {
+      const btn = document.getElementById('btn-cam');
+      const videoElement = document.getElementById('input-video');
+
+      // Indicate loading
+      btn.querySelector('i').classList.add('animate-spin');
+
+      try {
+        // Initialize MediaPipe Hands
+        const hands = new window.Hands({
+          locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+          }
+        });
+
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 1, // 0 for faster speed on mobile, 1 for accuracy
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+
+        hands.onResults(onHandsResults);
+
+        // Initialize Camera Utils
+        const cam = new window.Camera(videoElement, {
+          onFrame: async () => {
+            await hands.send({ image: videoElement });
+          },
+          width: 640,
+          height: 480
+        });
+
+        await cam.start();
+
+        // Success UI update
+        btn.querySelector('i').classList.remove('animate-spin');
+        btn.querySelector('i').classList.add('text-emerald-400', 'text-white');
+        document.getElementById('cam-active-indicator').classList.remove('opacity-0');
+
+      } catch (err) {
+        console.error("Camera Init Error:", err);
+        btn.querySelector('i').classList.remove('animate-spin');
+        alert("Could not access camera. Please allow permissions.");
+      }
+    };
+
+    function onHandsResults(results) {
+      STATE.hands.active = false;
+
+      // Reset if lost
+      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+        STATE.hands.left.target.set(-100, 0, 0);
+        STATE.hands.right.target.set(100, 0, 0);
+        document.getElementById('hand-status').classList.add('opacity-0');
+      } else {
+        STATE.hands.active = true;
+        document.getElementById('hand-status').classList.remove('opacity-0');
+
+        for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+          const landmarks = results.multiHandLandmarks[i];
+          const handedness = results.multiHandedness[i].label; // Left or Right
+
+          // Convert coords: MediaPipe (0,1) -> Three.js World Coords (approx)
+          // Inverting X because webcam is usually mirrored
+          const x = (0.5 - landmarks[9].x) * 50;
+          const y = (0.5 - landmarks[9].y) * 35;
+          const z = -landmarks[9].z * 30; // Depth estimation
+
+          // Detect Pinch
+          const thumbTip = landmarks[4];
+          const indexTip = landmarks[8];
+          const pinchDist = Math.sqrt(
+            Math.pow(thumbTip.x - indexTip.x, 2) +
+            Math.pow(thumbTip.y - indexTip.y, 2)
+          );
+
+          let state = 0;
+          if (pinchDist < 0.05) state = -1.0; // Pinching
+          else state = 1.0; // Open hand
+
+          if (handedness === 'Right') {
+            STATE.hands.right.target.set(x, y, z);
+            STATE.hands.right.state = state;
+          } else {
+            STATE.hands.left.target.set(x, y, z);
+            STATE.hands.left.state = state;
+          }
+        }
+      }
+    }
+
+    // --- INTERACTION LOGIC ---
+    window.setMode = (idx) => {
+      STATE.targetMode = idx;
+      document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+        if (i === idx) {
+          btn.classList.add('active', 'bg-white/10');
+          btn.classList.remove('bg-transparent');
+          btn.querySelector('span:first-child').classList.add('text-white');
+        } else {
+          btn.classList.remove('active', 'bg-white/10');
+          btn.classList.add('bg-transparent');
+          btn.querySelector('span:first-child').classList.remove('text-white');
+        }
+      });
+      const names = ['NEBULA CLOUD', 'QUANTUM TORUS', 'CYBER LATTICE', 'WARP VORTEX'];
+      document.getElementById('sim-mode').innerText = names[idx];
+    };
+
+    window.cycleColor = (idx) => {
+      STATE.colorPalette = idx;
+      // Smooth color transition is handled in GSAP-like fashion in animate loop manually if needed, 
+      // but here we just update uniforms, which is fast enough.
+      // For smoother transition we could lerp, but direct swap is responsive.
+    };
+
+    // --- EVENTS ---
+    document.getElementById('btn-audio').onclick = setupAudio;
+    document.getElementById('btn-cam').onclick = initHandTracking;
+    document.getElementById('btn-rec').onclick = () => {
+      renderer.render(scene, camera);
+      const link = document.createElement('a');
+      link.download = `aether-os-${Date.now()}.png`;
+      link.href = renderer.domElement.toDataURL('image/png');
+      link.click();
+    };
+
+    // Mouse Fallback
+    window.addEventListener('mousemove', (e) => {
+      if (STATE.hands.active) return;
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = -(e.clientY / window.innerHeight) * 2 + 1;
+      STATE.hands.right.target.set(x * 30, y * 20, 0);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+
+      CONFIG.cameraZ = window.innerWidth < 768 ? 40 : 28;
+    });
+
+    // --- ANIMATION LOOP ---
+    const clock = new THREE.Clock();
+    lucide.createIcons();
+
+    // Remove loader
+    setTimeout(() => document.getElementById('loader').style.opacity = '0', 800);
+    setTimeout(() => document.getElementById('loader').remove(), 1800);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      STATE.time += delta;
+
+      // Audio Level
+      if (analyser) {
+        analyser.getByteFrequencyData(dataArray);
+        const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+        STATE.audioLevel += (avg / 255 - STATE.audioLevel) * 0.1; // Smooth lerp
+        material.uniforms.uAudio.value = STATE.audioLevel;
+      }
+
+      // Mode Transition
+      if (Math.abs(STATE.mode - STATE.targetMode) > 0.001) {
+        STATE.mode += (STATE.targetMode - STATE.mode) * 0.05; // Smooth slide
+      } else {
+        STATE.mode = STATE.targetMode;
+      }
+      material.uniforms.uMode.value = STATE.mode;
+
+      // Update Time
+      material.uniforms.uTime.value = STATE.time;
+      finalPass.uniforms.uTime.value = STATE.time;
+
+      // Smooth Hand/Mouse Movement
+      const lerpFactor = 0.1;
+      STATE.hands.left.pos.lerp(STATE.hands.left.target, lerpFactor);
+      STATE.hands.right.pos.lerp(STATE.hands.right.target, lerpFactor);
+
+      material.uniforms.uHandLeft.value.copy(STATE.hands.left.pos);
+      material.uniforms.uHandRight.value.copy(STATE.hands.right.pos);
+      material.uniforms.uHandLeftState.value = STATE.hands.left.state;
+      material.uniforms.uHandRightState.value = STATE.hands.right.state;
+
+      // Color Smooth Transition
+      const targetC1 = palettes[STATE.colorPalette].c1;
+      const targetC2 = palettes[STATE.colorPalette].c2;
+      material.uniforms.uColor1.value.lerp(targetC1, 0.05);
+      material.uniforms.uColor2.value.lerp(targetC2, 0.05);
+
+      // Camera Sway (Subtle idle movement)
+      if (!STATE.hands.active) {
+        const zTarget = CONFIG.cameraZ + Math.sin(STATE.time * 0.5) * 2;
+        camera.position.z += (zTarget - camera.position.z) * 0.02;
+        camera.position.x = Math.sin(STATE.time * 0.2) * 2;
+        camera.position.y = Math.cos(STATE.time * 0.15) * 2;
+        camera.lookAt(0, 0, 0);
+      }
+
+      composer.render();
+    }
+
+    animate();
+  </script>
+  <script
+    data-img-fallback-handler="\">!function () { var f = ["https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/30104e3c-5eea-4b93-93e9-5313698a7156_1600w.webp"], h = new Set; function g(s) { for (var x = 0, i = 0; i < s.length; i++)x = (x << 5) - x + s.charCodeAt(i) | 0; return f[Math.abs(x) % f.length] } function r(t) { var s = t.src; if (s && !h.has(s)) { h.add(s); t.src = g(s) } } window.addEventListener("error", function (e) { var t = e.target; if (t && t.tagName === "IMG") r(t) }, !0); function c() { document.querySelectorAll("img").forEach(function (i) { if (i.complete && !i.naturalWidth && i.src) r(i) }) } if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", c); else c() }()</script>
+</body>
+
+</html>

@@ -742,6 +742,79 @@
       border-color: color-mix(in srgb, var(--accent-1), transparent 80%);
       transition: border-color 0.5s ease;
     }
+
+    /* Novos efeitos para a foto de perfil */
+    .portrait-glow {
+      filter: drop-shadow(0 0 20px color-mix(in srgb, var(--accent-1), transparent 60%));
+    }
+    
+    .portrait-scanlines::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.05) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    /* Efeito de Aura Traseira (Halo) Imersiva */
+    @keyframes halo-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.25; }
+      50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.45; }
+    }
+
+    .portrait-halo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      height: 90%;
+      background: radial-gradient(circle, var(--accent-1) 0%, transparent 75%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+      transition: background 0.5s ease;
+      animation: halo-pulse 4s ease-in-out infinite;
+    }
+
+    .portrait-img {
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 25px color-mix(in srgb, var(--accent-1), transparent 70%));
+      transition: filter 0.5s ease, transform 0.3s ease;
+    }
+
+    .portrait-img:hover {
+      transform: scale(1.02) translateY(-5px);
+      filter: drop-shadow(0 10px 35px color-mix(in srgb, var(--accent-1), transparent 50%));
+    }
+
+    /* Efeito de Partículas (Inspirado no button.html) */
+    .particle-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .particle-btn::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      pointer-events: none;
+      z-index: -1;
+      background-repeat: no-repeat;
+      opacity: 0;
+    }
+
+    .particle-btn.animating::after {
+      animation: theButtonAnimation 1.65s linear forwards;
+      opacity: 1;
+    }
   </style>
   <style data-scroll-fix="true">
     /* Scroll fixes for offline viewing */
@@ -924,6 +997,7 @@
       animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
     }
   </style>
+  <link rel="stylesheet" href="assets/css/particle-button.css">
 </head>
 
 <body class="antialiased text-neutral-200 bg-[#0b0b0c] h-full"
@@ -934,49 +1008,9 @@
   <!-- Main Canvas -->
   <div class="fixed inset-0" style="z-index: -20;" id="canvas-container"></div>
   <!-- UI: Header / HUD -->
-  <header
-    class="fixed top-16 left-0 w-full p-4 md:p-6 z-[19] flex flex-row justify-between items-start pointer-events-none">
-    <!-- Left: Branding & Stats -->
-    <div class="flex flex-col gap-2 pointer-events-auto">
-      <div class="flex items-center gap-3">
-        <div class="relative w-2 h-2">
-          <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
-          <div class="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-        </div>
-        <h1 class="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90">Aether<span
-            class="opacity-40">.OS</span></h1>
-      </div>
-      <div
-        class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4 text-[10px] font-mono text-sci-dim tracking-wider">
-        <span class="text-white/70 transition-colors duration-500" id="sim-mode">NEBULA CLOUD</span>
-        <span class="hidden xs:inline w-px h-2 bg-white/10"></span>
-        <span class="opacity-60" id="particle-count">120K NODES</span>
-      </div>
-    </div>
-    <!-- Right: Actions -->
-    <div class="flex gap-2 pointer-events-auto">
-      <button aria-label="Microphone"
-        class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group"
-        id="btn-audio">
-        <i class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors" data-lucide="mic"></i>
-      </button>
-      <button aria-label="Camera"
-        class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group relative overflow-hidden"
-        id="btn-cam">
-        <i class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors z-10 relative"
-          data-lucide="video"></i>
-        <div class="absolute inset-0 bg-emerald-500/10 opacity-0 transition-opacity" id="cam-active-indicator"></div>
-      </button>
-      <button aria-label="Capture"
-        class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group"
-        id="btn-rec">
-        <i class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors" data-lucide="aperture"></i>
-      </button>
-    </div>
-  </header>
+
   <!-- UI: Camera Preview (Hidden but functional) -->
-  <video class="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none z-[-1]" id="input-video"
-    playsinline=""></video>
+
   <!-- UI: Bottom Controls Area -->
   <div
     class="fixed bottom-0 left-0 w-full z-20 pointer-events-none p-4 md:p-6 flex flex-col md:flex-row justify-between items-end gap-4">
@@ -988,13 +1022,7 @@
           <i class="w-3 h-3 text-white/40" data-lucide="cpu"></i>
           <span class="text-[10px] font-medium uppercase tracking-widest text-white/50">Simulation</span>
         </div>
-        <!-- Gesture Status Indicator -->
-        <div
-          class="opacity-0 transition-opacity duration-300 flex items-center gap-1.5 dynamic-bg-10 px-1.5 py-0.5 rounded border dynamic-border-20"
-          id="hand-status">
-          <div class="w-1 h-1 rounded-full dynamic-bg-dot animate-pulse"></div>
-          <span class="text-[9px] font-mono dynamic-text tracking-tight">TRACKING</span>
-        </div>
+
       </div>
       <div class="grid grid-cols-2 gap-1.5">
         <button
@@ -1031,14 +1059,17 @@
       <!-- Palette Switcher -->
       <div class="sci-panel p-1.5 rounded-full flex md:flex-col flex-row gap-2">
         <button
-          class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
-          onclick="window.cycleColor(0)"></button>
+          class="particle-btn w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
+          onclick="window.cycleColor(0); triggerParticles(this)"></button>
         <button
-          class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
-          onclick="window.cycleColor(1)"></button>
+          class="particle-btn w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
+          onclick="window.cycleColor(1); triggerParticles(this)"></button>
         <button
-          class="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
-          onclick="window.cycleColor(2)"></button>
+          class="particle-btn w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
+          onclick="window.cycleColor(2); triggerParticles(this)"></button>
+        <button
+          class="particle-btn w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"
+          onclick="window.cycleColor(3); triggerParticles(this)"></button>
       </div>
       <div class="hidden md:block text-[9px] font-mono text-right text-white/20 leading-tight">
         <p>INTERACTION ENGINE V2.0</p>
@@ -1090,7 +1121,7 @@
     </div>
 
     <div class="loader-status-text loader-glitch">
-      Initializing Aether<span class="opacity-40">.OS</span> Core
+      Inicializando Sistema...
     </div>
     <div class="mt-4 flex gap-1">
       <div class="w-1 h-1 bg-white/20 animate-pulse"></div>
@@ -1116,8 +1147,8 @@
         </div>
         <!-- CTA Button -->
         <div class="flex items-center">
-          <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10"
-            href="#contact">
+          <a class="particle-btn inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10"
+            href="#contact" onclick="triggerParticles(this)">
             <svg aria-hidden="true" class="lucide lucide-send h-4 w-4" data-lucide="send" fill="none" height="24"
               stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"
               width="24" xmlns="http://www.w3.org/2000/svg">
@@ -1150,8 +1181,8 @@
       <span class="tracking-tighter font-geist dynamic-text">Web Designer Dev</span>
     </h1>
     <p class="mt-3 text-base sm:text-lg max-w-3xl font-geist text-neutral-400">
-      Crio sites rápidos, estratégicos e pensados para gerar resultado real.<br>
-      👉 Do design à conversão: tudo focado no crescimento do seu projeto.
+      Mais do que sites, crio experiências digitais imersivas que conectam e convertem.<br>
+      Estratégia, design e performance extrema para impulsionar o seu negócio.
     </p>
     <div class="mt-6 flex gap-4">
       <a href="portfolio.html"
@@ -1169,12 +1200,16 @@
         <section
           class="relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10">
           <div class="p-3 sm:p-4">
-            <div class="relative rounded-2xl overflow-hidden ring-1 bg-neutral-900 ring-white/10">
-              <img alt="Portrait" class="w-full h-auto" src="Foto minha 2.webp" />
+            <div class="relative rounded-2xl overflow-hidden ring-1 bg-neutral-900/20 ring-white/10 portrait-scanlines">
+              <div class="portrait-halo"></div>
+              <img alt="Portrait" class="w-full h-auto portrait-img" src="../foto hero2.png" />
               <div
-                class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full px-2.5 py-1.5 ring-1 backdrop-blur bg-black/60 ring-white/10">
-                <span class="h-2.5 w-2.5 rounded-full dynamic-bg-dot"></span>
-                <span class="text-[12px] font-geist text-neutral-200">Disponível para projetos</span>
+                class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full px-2.5 py-1.5 ring-1 backdrop-blur-md bg-black/60 ring-white/20 z-10 shadow-lg shadow-black/20">
+                <div class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full dynamic-bg-dot opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 dynamic-bg-dot"></span>
+                </div>
+                <span class="text-[11px] font-geist font-medium text-neutral-100 tracking-tight">Disponível para projetos</span>
               </div>
             </div>
             <div class="sm:px-1 pr-2 pl-2">
@@ -1237,8 +1272,8 @@
               </div>
               <div class="my-5 h-px bg-gradient-to-r to-transparent from-white/10 via-white/5"></div>
               <div class="mb-2">
-                <a class="inline-flex items-center gap-2 hover:shadow-lg transition text-sm font-medium text-black font-geist bg-white rounded-full pt-2.5 pr-4 pb-2.5 pl-4 shadow"
-                  href="#contact">
+                  <a class="particle-btn inline-flex items-center gap-2 hover:shadow-lg transition text-sm font-medium text-black font-geist bg-white rounded-full pt-2.5 pr-4 pb-2.5 pl-4 shadow"
+                    href="#contact" onclick="triggerParticles(this)">
                   <svg aria-hidden="true" class="lucide lucide-send h-4 w-4" data-lucide="send" fill="none" height="24"
                     stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
@@ -2042,6 +2077,7 @@
       { c1: new THREE.Color('#7c3aed'), c2: new THREE.Color('#d946ef') }, // Purple / Fuchsia
       { c1: new THREE.Color('#34d399'), c2: new THREE.Color('#0891b2') }, // Emerald / Cyan
       { c1: new THREE.Color('#fb923c'), c2: new THREE.Color('#e11d48') }, // Orange / Rose
+      { c1: new THREE.Color('#fbbf24'), c2: new THREE.Color('#d97706') }, // Yellow / Amber
     ];
 
     const material = new THREE.ShaderMaterial({
@@ -2066,121 +2102,9 @@
     const points = new THREE.Points(geometry, material);
     scene.add(points);
 
-    // --- AUDIO SYSTEM ---
-    let audioContext, analyser, dataArray;
-    const setupAudio = async () => {
-      if (audioContext) return;
-      try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const source = audioContext.createMediaStreamSource(stream);
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 64;
-        analyser.smoothingTimeConstant = 0.8;
-        source.connect(analyser);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        const btn = document.getElementById('btn-audio');
-        btn.classList.add('bg-white/10', 'border-white/20');
-        btn.querySelector('i').classList.remove('text-white/60');
-        btn.querySelector('i').classList.add('dynamic-text');
-      } catch (e) {
-        console.error("Audio denied", e);
-      }
-    };
 
-    // --- HAND TRACKING SYSTEM (Robust) ---
-    const initHandTracking = async () => {
-      const btn = document.getElementById('btn-cam');
-      const videoElement = document.getElementById('input-video');
 
-      // Indicate loading
-      btn.querySelector('i').classList.add('animate-spin');
-
-      try {
-        // Initialize MediaPipe Hands
-        const hands = new window.Hands({
-          locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-          }
-        });
-
-        hands.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 1, // 0 for faster speed on mobile, 1 for accuracy
-          minDetectionConfidence: 0.5,
-          minTrackingConfidence: 0.5
-        });
-
-        hands.onResults(onHandsResults);
-
-        // Initialize Camera Utils
-        const cam = new window.Camera(videoElement, {
-          onFrame: async () => {
-            await hands.send({ image: videoElement });
-          },
-          width: 640,
-          height: 480
-        });
-
-        await cam.start();
-
-        // Success UI update
-        btn.querySelector('i').classList.remove('animate-spin');
-        btn.querySelector('i').classList.add('dynamic-text', 'text-white');
-        document.getElementById('cam-active-indicator').classList.remove('opacity-0');
-
-      } catch (err) {
-        console.error("Camera Init Error:", err);
-        btn.querySelector('i').classList.remove('animate-spin');
-        alert("Could not access camera. Please allow permissions.");
-      }
-    };
-
-    function onHandsResults(results) {
-      STATE.hands.active = false;
-
-      // Reset if lost
-      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-        STATE.hands.left.target.set(-100, 0, 0);
-        STATE.hands.right.target.set(100, 0, 0);
-        document.getElementById('hand-status').classList.add('opacity-0');
-      } else {
-        STATE.hands.active = true;
-        document.getElementById('hand-status').classList.remove('opacity-0');
-
-        for (let i = 0; i < results.multiHandLandmarks.length; i++) {
-          const landmarks = results.multiHandLandmarks[i];
-          const handedness = results.multiHandedness[i].label; // Left or Right
-
-          // Convert coords: MediaPipe (0,1) -> Three.js World Coords (approx)
-          // Inverting X because webcam is usually mirrored
-          const x = (0.5 - landmarks[9].x) * 50;
-          const y = (0.5 - landmarks[9].y) * 35;
-          const z = -landmarks[9].z * 30; // Depth estimation
-
-          // Detect Pinch
-          const thumbTip = landmarks[4];
-          const indexTip = landmarks[8];
-          const pinchDist = Math.sqrt(
-            Math.pow(thumbTip.x - indexTip.x, 2) +
-            Math.pow(thumbTip.y - indexTip.y, 2)
-          );
-
-          let state = 0;
-          if (pinchDist < 0.05) state = -1.0; // Pinching
-          else state = 1.0; // Open hand
-
-          if (handedness === 'Right') {
-            STATE.hands.right.target.set(x, y, z);
-            STATE.hands.right.state = state;
-          } else {
-            STATE.hands.left.target.set(x, y, z);
-            STATE.hands.left.state = state;
-          }
-        }
-      }
-    }
 
     // --- INTERACTION LOGIC ---
     window.setMode = (idx) => {
@@ -2197,7 +2121,7 @@
         }
       });
       const names = ['NEBULA CLOUD', 'QUANTUM TORUS', 'CYBER LATTICE', 'WARP VORTEX'];
-      document.getElementById('sim-mode').innerText = names[idx];
+
     };
 
     window.cycleColor = (idx) => {
@@ -2208,15 +2132,7 @@
     };
 
     // --- EVENTS ---
-    document.getElementById('btn-audio').onclick = setupAudio;
-    document.getElementById('btn-cam').onclick = initHandTracking;
-    document.getElementById('btn-rec').onclick = () => {
-      renderer.render(scene, camera);
-      const link = document.createElement('a');
-      link.download = `aether-os-${Date.now()}.png`;
-      link.href = renderer.domElement.toDataURL('image/png');
-      link.click();
-    };
+
 
     // Mouse Fallback
     window.addEventListener('mousemove', (e) => {
@@ -2248,13 +2164,7 @@
       const delta = clock.getDelta();
       STATE.time += delta;
 
-      // Audio Level
-      if (analyser) {
-        analyser.getByteFrequencyData(dataArray);
-        const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-        STATE.audioLevel += (avg / 255 - STATE.audioLevel) * 0.1; // Smooth lerp
-        material.uniforms.uAudio.value = STATE.audioLevel;
-      }
+
 
       // Mode Transition
       if (Math.abs(STATE.mode - STATE.targetMode) > 0.001) {
@@ -2300,6 +2210,19 @@
   </script>
   <script
     data-img-fallback-handler="\">!function () { var f = ["https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp", "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/30104e3c-5eea-4b93-93e9-5313698a7156_1600w.webp"], h = new Set; function g(s) { for (var x = 0, i = 0; i < s.length; i++)x = (x << 5) - x + s.charCodeAt(i) | 0; return f[Math.abs(x) % f.length] } function r(t) { var s = t.src; if (s && !h.has(s)) { h.add(s); t.src = g(s) } } window.addEventListener("error", function (e) { var t = e.target; if (t && t.tagName === "IMG") r(t) }, !0); function c() { document.querySelectorAll("img").forEach(function (i) { if (i.complete && !i.naturalWidth && i.src) r(i) }) } if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", c); else c() }()</script>
+  <script>
+    // Função para disparar as partículas do botão
+    function triggerParticles(btn) {
+      btn.classList.remove('animating');
+      void btn.offsetWidth; // Trigger reflow
+      btn.classList.add('animating');
+      
+      // Remove a classe após a animação terminar (1.65s)
+      setTimeout(() => {
+        btn.classList.remove('animating');
+      }, 1650);
+    }
+  </script>
 </body>
 
 </html>< ! - -   d e p l o y m e n t   t r i g g e r   - - > 

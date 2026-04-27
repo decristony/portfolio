@@ -1622,10 +1622,13 @@
 
     window.cycleColor = (idx) => {
       STATE.colorPalette = idx;
-      // Smooth color transition is handled in GSAP-like fashion in animate loop manually if needed, 
-      // but here we just update uniforms, which is fast enough.
-      // For smoother transition we could lerp, but direct swap is responsive.
+      const p = palettes[idx];
+      document.documentElement.style.setProperty('--accent-1', '#' + p.c1.getHexString());
+      document.documentElement.style.setProperty('--accent-2', '#' + p.c2.getHexString());
     };
+
+    // Aplicar cor padrão (Amarelo/Âmbar) nos elementos UI ao carregar
+    window.cycleColor(3);
 
     // --- EVENTS ---
 

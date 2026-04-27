@@ -1026,13 +1026,10 @@
       </div>
       <div class="grid grid-cols-2 gap-1.5">
         <button
-          class="mode-btn active group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 text-left"
+          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
           onclick="window.setMode(0)">
-          <span class="text-[10px] text-white/80 group-hover:text-white font-medium">Nebula</span>
-          <span class="text-[9px] font-mono text-white/30">01</span>
-          <div
-            class="absolute inset-0 border border-white/10 rounded-lg opacity-0 group-[.active]:opacity-100 pointer-events-none">
-          </div>
+          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Nebula</span>
+          <span class="text-[9px] font-mono text-white/20">01</span>
         </button>
         <button
           class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
@@ -1047,9 +1044,9 @@
           <span class="text-[9px] font-mono text-white/20">03</span>
         </button>
         <button
-          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+          class="mode-btn active group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-white/10 hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
           onclick="window.setMode(3)">
-          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Vortex</span>
+          <span class="text-[10px] text-white group-hover:text-white transition-colors">Vortex</span>
           <span class="text-[9px] font-mono text-white/20">04</span>
         </button>
       </div>
@@ -1758,11 +1755,11 @@
         left: { pos: new THREE.Vector3(-100, 0, 0), target: new THREE.Vector3(-100, 0, 0), state: 0 },
         right: { pos: new THREE.Vector3(100, 0, 0), target: new THREE.Vector3(100, 0, 0), state: 0 },
       },
-      mode: 0,
-      targetMode: 0,
+      mode: 3,
+      targetMode: 3,
       audioLevel: 0,
       time: 0,
-      colorPalette: 0
+      colorPalette: 3
     };
 
     // --- SCENE SETUP ---
@@ -2089,8 +2086,8 @@
         uHandLeftState: { value: 0 },
         uHandRightState: { value: 0 },
         uAudio: { value: 0 },
-        uColor1: { value: palettes[0].c1.clone() },
-        uColor2: { value: palettes[0].c2.clone() }
+        uColor1: { value: palettes[3].c1.clone() },
+        uColor2: { value: palettes[3].c2.clone() }
       },
       vertexShader: particleVertexShader,
       fragmentShader: particleFragmentShader,

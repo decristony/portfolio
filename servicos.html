@@ -1,0 +1,142 @@
+<html class="h-full" lang="pt-br">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Serviços — Tony (Decristony)</title>
+  <link href="assets/css2_86e10c4bcbd4.css" rel="stylesheet" />
+  <script src="assets/lucide_latest_2eebd0ebe8c2.es"></script>
+  <style>
+    body { margin: 0; background-color: #030305; color: white; overflow-x: hidden; font-family: 'Geist', sans-serif; }
+    .font-geist { font-family: 'Geist', sans-serif !important; }
+    .sci-panel { background: rgba(10, 10, 12, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .scanlines { position: fixed; inset: 0; z-index: -10; background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.06) 50%); background-size: 100% 4px; pointer-events: none; opacity: 0.4; }
+    .vignette { position: fixed; inset: 0; z-index: -10; background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.8) 120%); pointer-events: none; }
+    :root { --accent-1: #a855f7; --accent-2: #ec4899; }
+    .dynamic-text { color: var(--accent-1); }
+    .dynamic-bg-10 { background-color: rgba(168, 85, 247, 0.1); }
+    .dynamic-border-20 { border-color: rgba(168, 85, 247, 0.2); }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="antialiased text-neutral-200">
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+
+  <!-- Navigation -->
+  <nav class="relative border-b backdrop-blur-sm border-white/10 bg-black/20 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <div class="flex items-center">
+          <a class="text-lg font-semibold text-white tracking-tight font-geist" href="index.html">TD</a>
+        </div>
+        <div class="hidden md:flex space-x-8 items-center">
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="index.html">Home</a>
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="portfolio.html">Portfólio</a>
+          <a class="transition text-white text-sm font-medium font-geist" href="servicos.html">Serviços</a>
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="contato.html">Contato</a>
+        </div>
+        <div class="flex items-center">
+          <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10" href="contato.html">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span class="hidden sm:inline font-geist">Falar comigo</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="sm:px-6 lg:px-8 md:pt-16 max-w-7xl mx-auto pt-10 px-4">
+    <div class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-3 py-1.5 shadow-sm backdrop-blur border-white/10">
+      <i data-lucide="sparkles" class="w-4 h-4 dynamic-text"></i>
+      <span class="text-[13px] leading-none text-neutral-300 font-geist">Soluções Digitais</span>
+    </div>
+    <h1 class="sm:text-5xl lg:text-6xl text-4xl tracking-tighter font-geist mt-6 text-neutral-100">Nossos <span class="dynamic-text">Serviços</span></h1>
+    <p class="mt-3 text-base sm:text-lg max-w-3xl font-geist text-neutral-400">
+      Estratégia, design e tecnologia unidos para criar experiências digitais de alto impacto e conversão.
+    </p>
+  </header>
+
+  <main class="md:mt-12 mt-8 pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Service Card 1 -->
+        <div class="sci-panel p-6 rounded-3xl relative overflow-hidden group">
+          <div class="absolute -bottom-20 -left-20 w-40 h-40 dynamic-bg-10 blur-3xl opacity-50"></div>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="p-3 rounded-2xl dynamic-bg-10 dynamic-border-20 border">
+              <i data-lucide="layout-dashboard" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-2xl font-geist text-white tracking-tight">Criação de Websites Profissionais</h3>
+          </div>
+          <p class="text-neutral-400 mb-6 font-geist">Sites modernos, responsivos e otimizados para SEO. Foco total em performance e experiência do usuário (UX).</p>
+          <ul class="space-y-2 text-sm text-neutral-300 font-geist">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Landing Pages de Alta Conversão</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Blogs e Portais de Conteúdo</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Manutenção e Otimização de Velocidade</li>
+          </ul>
+        </div>
+
+        <!-- Service Card 2 -->
+        <div class="sci-panel p-6 rounded-3xl relative overflow-hidden group">
+          <div class="absolute -top-20 -right-20 w-40 h-40 dynamic-bg-10 blur-3xl opacity-50"></div>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="p-3 rounded-2xl dynamic-bg-10 dynamic-border-20 border">
+              <i data-lucide="shopping-cart" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-2xl font-geist text-white tracking-tight">E-commerce WP & Shopify</h3>
+          </div>
+          <p class="text-neutral-400 mb-6 font-geist">Lojas virtuais robustas com integração de pagamentos, estoque e IA para automação de vendas.</p>
+          <ul class="space-y-2 text-sm text-neutral-300 font-geist">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Configuração de WooCommerce/Shopify</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Integração com Gateways de Pagamento</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Treinamento para Gestão da Loja</li>
+          </ul>
+        </div>
+
+        <!-- Service Card 3 -->
+        <div class="sci-panel p-6 rounded-3xl relative overflow-hidden group">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="p-3 rounded-2xl dynamic-bg-10 dynamic-border-20 border">
+              <i data-lucide="pen-tool" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-2xl font-geist text-white tracking-tight">Design & Edição de Imagens</h3>
+          </div>
+          <p class="text-neutral-400 mb-6 font-geist">Artes para redes sociais, anúncios e edição de fotos profissional com tratamento de cor e manipulação.</p>
+          <ul class="space-y-2 text-sm text-neutral-300 font-geist">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Ad Creatives (Facebook/Google Ads)</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Tratamento de Fotos & Mockups</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Identidade Visual Moderna</li>
+          </ul>
+        </div>
+
+        <!-- Service Card 4 -->
+        <div class="sci-panel p-6 rounded-3xl relative overflow-hidden group">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="p-3 rounded-2xl dynamic-bg-10 dynamic-border-20 border">
+              <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-2xl font-geist text-white tracking-tight">Automação & IA</h3>
+          </div>
+          <p class="text-neutral-400 mb-6 font-geist">Implementação de assistentes inteligentes e automação de processos para ganhar escala e tempo.</p>
+          <ul class="space-y-2 text-sm text-neutral-300 font-geist">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Chatbots Inteligentes</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Integração de APIs de IA</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Automação de Fluxos de Trabalho</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="relative border-t backdrop-blur-sm border-white/10 bg-black/20 py-12">
+    <div class="max-w-7xl mx-auto px-4 text-center text-neutral-400 text-sm font-geist">
+      <p>© 2026 Tony (Decristony) — Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+1. DESCRIÇÃO GERAL
+
+Edição de imagem fotorrealista, preservando a identidade original, mesma pessoa, mantendo a estrutura facial exata, mesmos olhos, mesmo nariz, mesma boca, mesmas proporções, sem alteração facial, sem mudança de identidade.
+
+Retrato de uma mulher jovem em estúdio, iluminada por luzes coloridas projetadas com formas geométricas. Ela está levemente de lado, olhando para fora do quadro, com expressão neutra/contemplativa. As mãos estão apoiadas próximas ao corpo, criando uma pose suave e elegante.
+
+
+
+2. ESTILO VISUAL
+
+Estilo artístico: fotografia editorial / fashion / studio portrait com abordagem artística
+
+Referências visuais: estética de campanhas de moda contemporâneas, uso de projeção de luz estilo gel lighting + gobos
+
+Nível de realismo: ultra realista com estilização forte via iluminação
+
+3. COMPOSIÇÃO
+
+Enquadramento: plano médio fechado (busto / half-body)
+
+Ângulo da câmera: levemente abaixo da linha dos olhos (ângulo sutilmente baixo)
+
+Regra de composição: sujeito deslocado do centro (tendência à regra dos terços)
+
+Profundidade: fundo desfocado leve, mas ainda legível; foco principal no rosto
+
+4. ILUMINAÇÃO
+
+Tipo de luz: artificial de estúdio com projeção (provável uso de projetor ou gobo com gel)
+
+Direção da luz: lateral forte (vindo da esquerda do frame), com sombras marcadas
+
+Intensidade: luz dura, alto contraste
+
+Temperatura de cor: mistura de quente (amarelo/laranja dominante) com acentos magenta/rosa
+
+Setup provável: projetor ou spotlight com gels coloridos + recortes geométricos (gobo), possivelmente uma única fonte principal
+
+5. CORES E GRADING
+
+Paleta de cores dominante: amarelo intenso, laranja, magenta, rosa, com contraste alto
+
+Contraste e saturação: alta saturação, contraste forte
+
+Color grading: estilo vibrante e dramático, próximo de um “color blocking” cinematográfico com tons quentes predominantes
+
+6. SUJEITO PRINCIPAL
+
+Gênero: feminino
+
+Idade aproximada: 20–30 anos
+
+Características físicas: pele clara, cabelo loiro liso, comprimento médio a longo, olhos claros (verde/azulado)
+
+Expressão facial: neutra, levemente pensativa
+
+Pose e linguagem corporal: corpo levemente girado, braços dobrados com mãos apoiadas, postura relaxada e elegante
+
+7. ROUPA E ESTILO (se aplicável)
+
+Tipo de roupa: camiseta básica
+
+Cores: base neutra (aparenta ser clara), porém fortemente influenciada pelas luzes coloridas
+
+Estilo: casual minimalista
+
+Acessórios: não visíveis
+
+8. AMBIENTE / CENÁRIO
+
+Local: estúdio
+
+Elementos de fundo: fundo neutro com projeções geométricas coloridas (formas diagonais/angulares)
+
+Nível de detalhamento: médio — fundo simples, destaque total na iluminação
+
+9. TEXTURAS E DETALHES
+
+Textura da pele: suave, bem definida, leve brilho especular na testa e rosto
+
+Imperfeições: mínimo grão, imagem limpa
+
+Nível de nitidez: alto no rosto, queda suave fora do plano focal
+
+10. CONFIGURAÇÕES DE CÂMERA (ESTIMADAS)
+
+Tipo de lente: provável 50mm a 85mm (retrato)
+
+Abertura: aproximadamente f/1.8 a f/2.8
+
+Profundidade de campo: rasa a moderada
+
+ISO: baixo (100–200)
+
+Velocidade do obturador: padrão de estúdio (1/125 ou similar)
+
+11. QUALIDADE DA IMAGEM
+
+Resolução percebida: alta
+
+Nitidez: alta no sujeito
+
+Presença de ruído ou grão: mínima
+
+Compressão: baixa
+
+12. PALAVRAS-CHAVE PARA PROMPT
+
+
+
+portrait, female model, studio lighting, colorful lighting, yellow light, magenta light, geometric light projection, gobo lighting, high contrast, cinematic lighting, fashion photography, sharp focus, soft skin, shallow depth of field, 85mm lens, dramatic shadows, vibrant colors, editorial style

@@ -28,7 +28,7 @@
   <nav class="relative border-b backdrop-blur-sm border-white/10 bg-black/20 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
-        <div class="flex items-center">
+        <div class="hidden md:flex items-center">
           <a class="text-lg font-semibold text-white tracking-tight font-geist" href="index.html">TD</a>
         </div>
         <div class="hidden md:flex space-x-8 items-center">
@@ -37,12 +37,34 @@
           <a class="transition text-white text-sm font-medium font-geist" href="servicos.html">Serviços</a>
           <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="contato.html">Contato</a>
         </div>
-        <div class="flex items-center">
-          <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10" href="contato.html">
+        <div class="hidden md:flex items-center">
+          <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10" href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank">
             <i data-lucide="send" class="w-4 h-4"></i>
             <span class="hidden sm:inline font-geist">Falar comigo</span>
           </a>
         </div>
+        <!-- Mobile Hamburger -->
+        <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')"
+          class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl sci-panel backdrop-blur-xl border border-white/5 hover:bg-white/10 transition-all">
+          <svg aria-hidden="true" class="lucide lucide-menu h-5 w-5 text-white/80" data-lucide="menu" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="4" x2="20" y1="12" y2="12"></line>
+            <line x1="4" x2="20" y1="6" y2="6"></line>
+            <line x1="4" x2="20" y1="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden hidden border-t border-white/10 bg-black/90 backdrop-blur-xl">
+      <div class="px-4 py-4 space-y-3">
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="index.html">Home</a>
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="portfolio.html">Portfólio</a>
+        <a class="block transition text-white text-sm font-medium font-geist py-2" href="servicos.html">Serviços</a>
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="contato.html">Contato</a>
+        <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10 mt-2" href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span class="font-geist">Falar comigo</span>
+        </a>
       </div>
     </div>
   </nav>
@@ -55,7 +77,7 @@
     </div>
     <h1 class="sm:text-5xl lg:text-6xl text-4xl tracking-tighter font-geist mt-6 text-neutral-100">Nossos <span class="dynamic-text">Serviços</span></h1>
     <p class="mt-3 text-base sm:text-lg max-w-3xl font-geist text-neutral-400">
-      Estratégia, design e tecnologia unidos para criar experiências digitais de alto impacto e conversão.
+      Estratégia, design e tecnologia unidos para criar experiências digitais de alto impacto.
     </p>
   </header>
 
@@ -80,21 +102,22 @@
         </div>
 
         <!-- Service Card 2 -->
-        <div class="sci-panel p-6 rounded-3xl relative overflow-hidden group">
+        <a href="https://decristony.github.io/Luxury-Cardapio/" target="_blank" rel="noopener noreferrer"
+          class="sci-panel p-6 rounded-3xl relative overflow-hidden group block">
           <div class="absolute -top-20 -right-20 w-40 h-40 dynamic-bg-10 blur-3xl opacity-50"></div>
           <div class="flex items-center gap-4 mb-4">
             <div class="p-3 rounded-2xl dynamic-bg-10 dynamic-border-20 border">
               <i data-lucide="shopping-cart" class="w-6 h-6 text-white"></i>
             </div>
-            <h3 class="text-2xl font-geist text-white tracking-tight">E-commerce WP & Shopify</h3>
+            <h3 class="text-2xl font-geist text-white tracking-tight">Criação de Menus Profissionais</h3>
           </div>
-          <p class="text-neutral-400 mb-6 font-geist">Lojas virtuais robustas com integração de pagamentos, estoque e IA para automação de vendas.</p>
+          <p class="text-neutral-400 mb-6 font-geist">Cardápios digitais interativos e menus visuais profissionais para restaurantes, bares e eventos.</p>
           <ul class="space-y-2 text-sm text-neutral-300 font-geist">
-            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Configuração de WooCommerce/Shopify</li>
-            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Integração com Gateways de Pagamento</li>
-            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Treinamento para Gestão da Loja</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Design de Cardápios Digitais</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Menus Interativos para Web</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Identidade Visual para Restaurantes</li>
           </ul>
-        </div>
+        </a>
 
         <!-- Service Card 3 -->
         <div class="sci-panel p-6 rounded-3xl relative overflow-hidden group">
@@ -104,9 +127,9 @@
             </div>
             <h3 class="text-2xl font-geist text-white tracking-tight">Design & Edição de Imagens</h3>
           </div>
-          <p class="text-neutral-400 mb-6 font-geist">Artes para redes sociais, anúncios e edição de fotos profissional com tratamento de cor e manipulação.</p>
+          <p class="text-neutral-400 mb-6 font-geist">Edição profissional de fotos com tratamento de cor, remoção de objetos e manipulação avançada.</p>
           <ul class="space-y-2 text-sm text-neutral-300 font-geist">
-            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Ad Creatives (Facebook/Google Ads)</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Remoção de Objetos e Correção de Cores</li>
             <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Tratamento de Fotos & Mockups</li>
             <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 dynamic-text"></i> Identidade Visual Moderna</li>
           </ul>

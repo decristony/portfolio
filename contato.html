@@ -30,7 +30,7 @@
   <nav class="relative border-b backdrop-blur-sm border-white/10 bg-black/20 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
-        <div class="flex items-center">
+        <div class="hidden md:flex items-center">
           <a class="text-lg font-semibold text-white tracking-tight font-geist" href="index.html">TD</a>
         </div>
         <div class="hidden md:flex space-x-8 items-center">
@@ -39,12 +39,34 @@
           <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="servicos.html">Serviços</a>
           <a class="transition text-white text-sm font-medium font-geist" href="contato.html">Contato</a>
         </div>
-        <div class="flex items-center">
-          <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10" href="contato.html">
+        <div class="hidden md:flex items-center">
+          <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10" href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank">
             <i data-lucide="send" class="w-4 h-4"></i>
             <span class="hidden sm:inline font-geist">Falar comigo</span>
           </a>
         </div>
+        <!-- Mobile Hamburger -->
+        <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')"
+          class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl sci-panel backdrop-blur-xl border border-white/5 hover:bg-white/10 transition-all">
+          <svg aria-hidden="true" class="lucide lucide-menu h-5 w-5 text-white/80" data-lucide="menu" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="4" x2="20" y1="12" y2="12"></line>
+            <line x1="4" x2="20" y1="6" y2="6"></line>
+            <line x1="4" x2="20" y1="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden hidden border-t border-white/10 bg-black/90 backdrop-blur-xl">
+      <div class="px-4 py-4 space-y-3">
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="index.html">Home</a>
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="portfolio.html">Portfólio</a>
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="servicos.html">Serviços</a>
+        <a class="block transition text-white text-sm font-medium font-geist py-2" href="contato.html">Contato</a>
+        <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10 mt-2" href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span class="font-geist">Falar comigo</span>
+        </a>
       </div>
     </div>
   </nav>
@@ -69,7 +91,7 @@
           <div class="sci-panel p-6 rounded-3xl">
             <h4 class="text-white font-medium mb-4 font-geist">Informações de Contato</h4>
             <div class="space-y-4">
-              <a href="https://wa.me/5561996725908" class="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors group">
+              <a href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank" class="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors group">
                 <div class="p-2 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/50">
                   <i data-lucide="phone" class="w-5 h-5 text-emerald-400"></i>
                 </div>
@@ -93,13 +115,16 @@
           <div class="sci-panel p-6 rounded-3xl">
             <h4 class="text-white font-medium mb-4 font-geist">Redes Sociais</h4>
             <div class="flex gap-4">
-              <a href="#" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:dynamic-bg-10 hover:dynamic-border-20 transition-all">
-                <i data-lucide="instagram" class="w-6 h-6 text-white"></i>
-              </a>
-              <a href="#" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:dynamic-bg-10 hover:dynamic-border-20 transition-all">
+              <a href="https://www.linkedin.com/in/decristonyaraujo/" target="_blank" rel="noopener noreferrer" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:dynamic-bg-10 hover:dynamic-border-20 transition-all">
                 <i data-lucide="linkedin" class="w-6 h-6 text-white"></i>
               </a>
-              <a href="#" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:dynamic-bg-10 hover:dynamic-border-20 transition-all">
+              <a href="https://www.instagram.com/decristony/" target="_blank" rel="noopener noreferrer" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:dynamic-bg-10 hover:dynamic-border-20 transition-all">
+                <i data-lucide="instagram" class="w-6 h-6 text-white"></i>
+              </a>
+              <a href="https://www.behance.net/decristaraujo7" target="_blank" rel="noopener noreferrer" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:dynamic-bg-10 hover:dynamic-border-20 transition-all">
+                <svg aria-hidden="true" class="w-6 h-6 text-white" viewbox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V5.021h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zM3 11h3.584c2.508 0 2.906-3-.312-3H3v3zm3.391 3H3v3.016h3.341c3.055 0 2.868-3.016.05-3.016z"/></svg>
+              </a>
+              <a href="https://github.com/decristony" target="_blank" rel="noopener noreferrer" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:dynamic-bg-10 hover:dynamic-border-20 transition-all">
                 <i data-lucide="github" class="w-6 h-6 text-white"></i>
               </a>
             </div>

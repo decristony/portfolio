@@ -1097,44 +1097,7 @@
 
   <!-- UI: Bottom Controls Area -->
   <div
-    class="fixed bottom-0 left-0 w-full z-20 pointer-events-none p-4 md:p-6 flex flex-col md:flex-row justify-between items-end gap-4">
-    <!-- Left: Mode Selector -->
-    <div
-      class="sci-panel p-3 rounded-xl pointer-events-auto w-full md:w-64 max-w-[300px] backdrop-blur-xl border border-white/5">
-      <div class="flex justify-between items-center mb-3 px-1">
-        <div class="flex items-center gap-2">
-          <i class="w-3 h-3 text-white/40" data-lucide="cpu"></i>
-          <span class="text-[10px] font-medium uppercase tracking-widest text-white/50">Simulation</span>
-        </div>
-
-      </div>
-      <div class="grid grid-cols-2 gap-1.5">
-        <button
-          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
-          onclick="window.setMode(0)">
-          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Nebula</span>
-          <span class="text-[9px] font-mono text-white/20">01</span>
-        </button>
-        <button
-          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
-          onclick="window.setMode(1)">
-          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Torus</span>
-          <span class="text-[9px] font-mono text-white/20">02</span>
-        </button>
-        <button
-          class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
-          onclick="window.setMode(2)">
-          <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Lattice</span>
-          <span class="text-[9px] font-mono text-white/20">03</span>
-        </button>
-        <button
-          class="mode-btn active group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-white/10 hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
-          onclick="window.setMode(3)">
-          <span class="text-[10px] text-white group-hover:text-white transition-colors">Vortex</span>
-          <span class="text-[9px] font-mono text-white/20">04</span>
-        </button>
-      </div>
-    </div>
+    class="fixed bottom-0 left-0 w-full z-20 pointer-events-none p-4 md:p-6 flex flex-row-reverse md:flex-row justify-between items-end gap-4">
     <!-- Right: Color & Info -->
     <div class="flex flex-row md:flex-col items-center md:items-end gap-3 pointer-events-auto">
       <!-- Palette Switcher -->
@@ -1156,6 +1119,47 @@
         <p>INTERACTION ENGINE V2.0</p>
         <p class="mt-0.5">SAYANTAN BARIK</p>
       </div>
+    </div>
+    <!-- Left: Simulation Toggle -->
+    <button onclick="document.getElementById('simPanel').classList.toggle('hidden')"
+      class="pointer-events-auto w-9 h-9 rounded-xl sci-panel flex items-center justify-center backdrop-blur-xl border border-white/5 hover:bg-white/10 transition-all">
+      <i class="w-4 h-4 text-white/60" data-lucide="cpu"></i>
+    </button>
+  </div>
+  <!-- Simulation Panel -->
+  <div id="simPanel"
+    class="fixed z-30 bottom-[100px] md:bottom-[200px] right-4 md:right-6 sci-panel p-3 rounded-xl pointer-events-auto w-full max-w-[280px] backdrop-blur-xl border border-white/5 hidden">
+    <div class="flex justify-between items-center mb-3 px-1">
+      <div class="flex items-center gap-2">
+        <i class="w-3 h-3 text-white/40" data-lucide="cpu"></i>
+        <span class="text-[10px] font-medium uppercase tracking-widest text-white/50">Simulation</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-1.5">
+      <button
+        class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+        onclick="window.setMode(0)">
+        <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Nebula</span>
+        <span class="text-[9px] font-mono text-white/20">01</span>
+      </button>
+      <button
+        class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+        onclick="window.setMode(1)">
+        <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Torus</span>
+        <span class="text-[9px] font-mono text-white/20">02</span>
+      </button>
+      <button
+        class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+        onclick="window.setMode(2)">
+        <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Lattice</span>
+        <span class="text-[9px] font-mono text-white/20">03</span>
+      </button>
+      <button
+        class="mode-btn active group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-white/10 hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left"
+        onclick="window.setMode(3)">
+        <span class="text-[10px] text-white group-hover:text-white transition-colors">Vortex</span>
+        <span class="text-[9px] font-mono text-white/20">04</span>
+      </button>
     </div>
   </div>
   <!-- Loader -->
@@ -1216,7 +1220,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
         <!-- Logo -->
-        <div class="flex items-center">
+        <div class="hidden md:flex items-center">
           <a class="text-lg font-semibold text-white tracking-tight font-geist" href="#">TD</a>
         </div>
         <!-- Navigation Links -->
@@ -1227,9 +1231,9 @@
           <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="contato.html">Contato</a>
         </div>
         <!-- CTA Button -->
-        <div class="flex items-center">
+        <div class="hidden md:flex items-center">
           <a class="particle-btn inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10"
-            href="#contact" onclick="triggerParticles(this)">
+            href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank" onclick="triggerParticles(this)">
             <svg aria-hidden="true" class="lucide lucide-send h-4 w-4" data-lucide="send" fill="none" height="24"
               stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"
               width="24" xmlns="http://www.w3.org/2000/svg">
@@ -1241,6 +1245,31 @@
             <span class="hidden sm:inline font-geist">Falar comigo</span>
           </a>
         </div>
+        <!-- Mobile Hamburger -->
+        <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')"
+          class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl sci-panel backdrop-blur-xl border border-white/5 hover:bg-white/10 transition-all">
+          <svg aria-hidden="true" class="lucide lucide-menu h-5 w-5 text-white/80" data-lucide="menu" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="4" x2="20" y1="12" y2="12"></line>
+            <line x1="4" x2="20" y1="6" y2="6"></line>
+            <line x1="4" x2="20" y1="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden hidden border-t border-white/10 bg-black/90 backdrop-blur-xl">
+      <div class="px-4 py-4 space-y-3">
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="index.html">Home</a>
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="portfolio.html">Portfólio</a>
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="servicos.html">Serviços</a>
+        <a class="block transition hover:text-white text-sm text-neutral-300 font-geist py-2" href="contato.html">Contato</a>
+        <a class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-4 py-2 text-sm font-medium transition backdrop-blur border-white/10 text-neutral-100 hover:bg-white/10 mt-2" href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank" onclick="triggerParticles(this)">
+          <svg aria-hidden="true" class="lucide lucide-send h-4 w-4" data-lucide="send" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path>
+            <path d="m21.854 2.147-10.94 10.939"></path>
+          </svg>
+          <span class="font-geist">Falar comigo</span>
+        </a>
       </div>
     </div>
   </nav>
@@ -1269,7 +1298,7 @@
       <a href="portfolio.html"
         class="inline-flex items-center gap-2 rounded-full border dynamic-border dynamic-bg-10 px-6 py-2.5 text-sm font-medium dynamic-text hover:dynamic-bg-20 transition-all">Ver
         Projetos</a>
-      <a href="#contact"
+      <a href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank"
         class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all">Falar
         comigo</a>
     </div>
@@ -1302,18 +1331,18 @@
                 exp, atuando na criação de soluções digitais de alto impacto.</p>
               <div class="mt-4 flex items-center gap-2.5">
                 <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
-                  href="#">
-                  <svg aria-hidden="true" class="lucide lucide-twitter h-4 w-4 group-hover:text-white text-neutral-300"
-                    data-lucide="twitter" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                  href="https://www.linkedin.com/in/decristonyaraujo/" target="_blank" rel="noopener noreferrer">
+                  <svg aria-hidden="true" class="lucide lucide-linkedin h-4 w-4 group-hover:text-white text-neutral-300"
+                    data-lucide="linkedin" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
                     stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
                     xmlns="http://www.w3.org/2000/svg">
-                    <path class=""
-                      d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z">
-                    </path>
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                    <rect width="4" height="12" x="2" y="9"></rect>
+                    <circle cx="4" cy="4" r="2"></circle>
                   </svg>
                 </a>
                 <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
-                  href="#">
+                  href="https://www.instagram.com/decristony/" target="_blank" rel="noopener noreferrer">
                   <svg aria-hidden="true" class="lucide lucide-instagram group-hover:text-white w-[16px] h-[16px]"
                     data-icon-replaced="true" data-lucide="instagram" fill="none" height="24" stroke="currentColor"
                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1325,20 +1354,15 @@
                   </svg>
                 </a>
                 <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
-                  href="#">
-                  <svg aria-hidden="true" class="lucide lucide-dribbble group-hover:text-white w-[16px] h-[16px]"
-                    data-icon-replaced="true" data-lucide="dribbble" fill="none" height="24" stroke="currentColor"
-                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    style="color: rgb(255, 255, 255); width: 16px; height: 16px;" viewbox="0 0 24 24" width="24"
+                  href="https://www.behance.net/decristaraujo7" target="_blank" rel="noopener noreferrer">
+                  <svg aria-hidden="true" class="group-hover:text-white w-[16px] h-[16px]"
+                    style="color: rgb(255, 255, 255); width: 16px; height: 16px;" viewbox="0 0 24 24" fill="currentColor"
                     xmlns="http://www.w3.org/2000/svg">
-                    <circle class="" cx="12" cy="12" r="10"></circle>
-                    <path class="" d="M19.13 5.09C15.22 9.14 10 10.44 2.25 10.94"></path>
-                    <path d="M21.75 12.84c-6.62-1.41-12.14 1-16.38 6.32"></path>
-                    <path class="" d="M8.56 2.75c4.37 6 6 9.42 8 17.72"></path>
+                    <path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V5.021h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zM3 11h3.584c2.508 0 2.906-3-.312-3H3v3zm3.391 3H3v3.016h3.341c3.055 0 2.868-3.016.05-3.016z"/>
                   </svg>
                 </a>
                 <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-10 h-10 border-white/10 border rounded-full"
-                  href="#">
+                  href="https://github.com/decristony" target="_blank" rel="noopener noreferrer">
                   <svg aria-hidden="true" class="lucide lucide-github group-hover:text-white w-[16px] h-[16px]"
                     data-icon-replaced="true" data-lucide="github" fill="none" height="24" stroke="currentColor"
                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1354,7 +1378,7 @@
               <div class="my-5 h-px bg-gradient-to-r to-transparent from-white/10 via-white/5"></div>
               <div class="mb-2">
                   <a class="particle-btn inline-flex items-center gap-2 hover:shadow-lg transition text-sm font-medium text-black font-geist bg-white rounded-full pt-2.5 pr-4 pb-2.5 pl-4 shadow"
-                    href="#contact" onclick="triggerParticles(this)">
+                    href="https://wa.me/5561996725908?text=Ol%C3%A1,%20Tony!%20Acabei%20de%20conhecer%20seu%20trabalho%20atrav%C3%A9s%20do%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20com%20voc%C3%AA.%0A%0AQuando%20poss%C3%ADvel,%20entre%20em%20contato.%20Obrigado!" target="_blank" onclick="triggerParticles(this)">
                   <svg aria-hidden="true" class="lucide lucide-send h-4 w-4" data-lucide="send" fill="none" height="24"
                     stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">

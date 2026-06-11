@@ -702,8 +702,8 @@
     }
 
     :root {
-      --accent-1: #7c3aed;
-      --accent-2: #d946ef;
+      --accent-1: #fbbf24;
+      --accent-2: #d97706;
     }
 
     .dynamic-text {
@@ -998,6 +998,90 @@
     }
   </style>
   <link rel="stylesheet" href="assets/css/particle-button.css">
+  <style>
+    .comparator-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      user-select: none;
+      touch-action: none;
+    }
+    .comparator-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+    }
+    .comparator-before-wrap,
+    .comparator-after-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .comparator-before-wrap {
+      clip-path: inset(0 50% 0 0);
+    }
+    .comparator-after-wrap {
+      clip-path: inset(0 0 0 50%);
+    }
+    .comparator-before-wrap img,
+    .comparator-after-wrap img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .comparator-handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      background: #fff;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 0 8px rgba(0,0,0,0.5);
+    }
+    .comparator-handle-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      color: #0f172a;
+      cursor: ew-resize;
+      pointer-events: auto;
+    }
+    .comparator-label {
+      position: absolute;
+      bottom: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .before-label { left: 12px; }
+    .after-label { right: 12px; }
+  </style>
 </head>
 
 <body class="antialiased text-neutral-200 bg-[#0b0b0c] h-full"
@@ -1295,7 +1379,7 @@
           <div class="flex flex-wrap mt-6 gap-x-2.5 gap-y-2.5">
             <span
               class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">WordPress
-              & WooCommerce</span>
+              / Elementor</span>
             <span
               class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">React
               & Next.js</span>
@@ -1309,8 +1393,8 @@
               class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3"
               style="mask-image: linear-gradient(100deg, transparent, black 0%, black 100%, transparent); -webkit-mask-image: linear-gradient(100deg, transparent, black 0%, black 100%, transparent);">Photoshop
               (Avançado)</span><span
-              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">Tráfego
-              Pago & UX/UI</span>
+              class="inline-flex items-center text-sm text-neutral-200 font-geist border-white/10 border rounded-xl pt-2 pr-3 pb-2 pl-3">Redesign
+              & Otimização</span>
           </div>
           <div class="mt-6 h-px bg-gradient-to-r to-transparent from-white/10 via-white/5"></div>
           <!-- Experience -->
@@ -1331,7 +1415,7 @@
                 <div class="">
                   <p class="text-sm font-medium text-neutral-200 tracking-tight font-geist">Web Designer & Desenvolvedor
                   </p>
-                  <p class="text-xs text-neutral-400 font-geist">Sites responsivos, e-commerce, automação</p>
+                  <p class="text-xs text-neutral-400 font-geist">Sites responsivos e otimização de imagens</p>
                 </div>
               </div>
               <span class="text-xs text-neutral-400 font-geist">2019-Atual</span>
@@ -1397,9 +1481,9 @@
                   </svg>
                 </div>
                 <div class="">
-                  <p class="text-sm font-medium text-neutral-200 tracking-tight font-geist">Especialista em Ad Creatives
+                  <p class="text-sm font-medium text-neutral-200 tracking-tight font-geist">Otimização Profissional de Imagens
                   </p>
-                  <p class="text-xs text-neutral-400 font-geist">Criativos de alta conversão</p>
+                  <p class="text-xs text-neutral-400 font-geist">Retoque e tratamento avançado</p>
                 </div>
               </div>
               <span class="text-xs text-neutral-400 font-geist">Otimizado</span>
@@ -1430,14 +1514,12 @@
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-geist tracking-tighter text-neutral-100" style="">
             Meus <span class="font-geist tracking-tighter dynamic-text" style="">Serviços</span>
           </h2>
-          <p class="sm:text-lg text-base text-neutral-400 font-geist max-w-2xl mt-3 mr-auto ml-auto">Criação de Websites
-            e Lojas Virtuais. Sites modernos, responsivos e focados em conversão, otimizados para vendas, e integração
-            de IA para maximizar desempenho.</p>
+          <p class="sm:text-lg text-base text-neutral-400 font-geist max-w-2xl mt-3 mr-auto ml-auto">Criação de Websites, Redesign e Otimização de Imagens. Sites modernos, responsivos e com tratamento profissional de imagens.</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 gap-x-6 gap-y-6">
           <!-- Card 1: Website Design (taller) -->
           <div
-            class="relative sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] ring-1 ring-white/[0.04] lg:row-span-2 overflow-hidden border rounded-3xl pt-5 pr-5 pb-5 pl-5 backdrop-blur-lg border-white/10">
+            class="relative sm:p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] ring-1 ring-white/[0.04] overflow-hidden border rounded-3xl pt-5 pr-5 pb-5 pl-5 backdrop-blur-lg border-white/10">
             <div class="absolute inset-0 pointer-events-none">
               <div class="absolute -bottom-40 -left-24 h-72 w-72 rounded-full blur-[120px] dynamic-bg-10"></div>
             </div>
@@ -1456,24 +1538,23 @@
               <h3 class="sm:text-2xl text-xl text-white tracking-tighter font-geist">Criação de Websites Profissionais
               </h3>
             </div>
-            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3">Sites modernos, responsivos e focados em
-              conversão. Otimização de performance & SEO para alcance orgânico e melhor posicionamento.</p>
-            <div class="mt-5 rounded-2xl overflow-hidden border border-white/10 bg-black/30">
-              <img alt="Website design showcase" class="aspect-video w-full object-cover"
-                src="assets/bf072b5e-1c5d-4961-91f2-3bf3e6_ad5ec1651e2b.png" />
-            </div>
-            <div class="mt-4 grid grid-cols-3 gap-3">
-              <img alt="UI concept" class="aspect-[4/3] w-full object-auto border-white/10 border rounded-xl"
-                src="assets/fe3f0a32-f06a-4127-bacc-518b40_1a4d3860a708.png" />
-              <img alt="Interface detail" class="aspect-[4/3] w-full object-auto border-white/10 border rounded-xl"
-                src="assets/92587f9e-68b7-4ea4-a715-d23c51_6f062d8fa9ea.png" />
-              <img alt="Product view" class="aspect-[4/3] w-full object-auto border-white/10 border rounded-xl"
-                src="assets/ef67e32e-3b97-4efd-ac43-70b1bb_e34a8ceea5dd.png" />
+            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3">Sites modernos, responsivos e otimizados. Performance & SEO para alcance orgânico e melhor posicionamento.</p>
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <a href="https://decristony.github.io/Aura-Premium/" target="_blank" rel="noopener noreferrer"
+                class="rounded-2xl overflow-hidden border border-white/10 bg-black/30 block">
+                <img alt="Mockup Liora" class="aspect-[4/3] w-full object-cover"
+                  src="tumbs/mockup liora (1).png" />
+              </a>
+              <a href="https://decristony.github.io/OdontoVitta/" target="_blank" rel="noopener noreferrer"
+                class="rounded-2xl overflow-hidden border border-white/10 bg-black/30 block">
+                <img alt="Mockup Odonto Vita" class="aspect-[4/3] w-full object-cover"
+                  src="tumbs/mockup odonto vita (1).png" />
+              </a>
             </div>
           </div>
-          <!-- Card 2: Logo Systems -->
-          <div
-            class="sm:p-6 border-white/10 border ring-1 rounded-3xl pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg">
+          <!-- Card 2: Menu Design -->
+          <a href="https://decristony.github.io/Luxury-Cardapio/" target="_blank" rel="noopener noreferrer"
+            class="sm:p-6 border-white/10 border ring-1 rounded-3xl pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg block">
             <div class="flex items-center gap-3">
               <div class="h-9 w-9 rounded-xl border flex items-center justify-center dynamic-border-20 dynamic-bg-10">
                 <svg aria-hidden="true" class="lucide lucide-pen-tool h-5 w-5 text-white/80" data-lucide="pen-tool"
@@ -1489,127 +1570,76 @@
                   <circle cx="11" cy="11" r="2"></circle>
                 </svg>
               </div>
-              <h3 class="text-xl sm:text-2xl font-geist tracking-tighter text-white" style="">E-commerce WP</h3>
+              <h3 class="text-xl sm:text-2xl font-geist tracking-tighter text-white">Criação de Menus Profissionais</h3>
             </div>
             <p class="mt-3 text-sm sm:text-base font-geist text-neutral-400">
-              Lojas completas com WooCommerce prontas para vender. Integração com IA, automação de processos e chatbots
-              inteligentes para faturamento online.
+              Cardápios digitais interativos e menus visuais profissionais para restaurantes, bares e eventos. Design moderno e de fácil navegação.
             </p>
-            <div class="mt-5 grid grid-cols-3 gap-3">
-              <div
-                class="col-span-1 flex bg-center bg-gradient-to-b from-white/5 to-white/0 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/ca46fa41-3b0d-4167-93fc-9b5228bcc0d2_800w.png)] bg-auto border-white/10 border rounded-2xl pt-4 pr-4 pb-4 pl-4 items-center justify-center">
-                <svg aria-hidden="true" class="lucide lucide-shapes w-[32px] h-[32px]" data-icon-replaced="true"
-                  data-lucide="shapes" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
-                  stroke-linejoin="round" stroke-width="2" style="color: rgb(229, 229, 229); width: 32px; height: 32px;"
-                  viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                  <path class=""
-                    d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z"></path>
-                  <rect class="" height="7" rx="1" width="7" x="3" y="14"></rect>
-                  <circle class="" cx="17.5" cy="17.5" r="3.5"></circle>
-                </svg>
-              </div>
-              <div
-                class="col-span-1 rounded-2xl border bg-gradient-to-b p-4 flex items-center justify-center border-white/10 from-white/5 to-white/0">
-                <svg aria-hidden="true" class="lucide lucide-beaker h-8 w-8 dynamic-text" data-lucide="beaker"
-                  fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                  stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                  <path class="" d="M4.5 3h15"></path>
-                  <path class="" d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"></path>
-                  <path d="M6 14h12"></path>
-                </svg>
-              </div>
-              <div
-                class="col-span-1 rounded-2xl border bg-gradient-to-b p-4 flex items-center justify-center border-white/10 from-white/5 to-white/0">
-                <svg aria-hidden="true" class="lucide lucide-badge-check h-8 w-8 dynamic-text" data-lucide="badge-check"
-                  fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                  stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                  <path class=""
-                    d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z">
-                  </path>
-                  <path d="m9 12 2 2 4-4"></path>
-                </svg>
-              </div>
+            <div class="mt-5 rounded-2xl overflow-hidden border border-white/10 bg-black/30">
+              <img alt="Mockup Menu" class="aspect-video w-full object-cover"
+                src="tumbs/mockup menu.webp" />
             </div>
-          </div>
-          <!-- Card 3: Prototype Design -->
+          </a>
+          <!-- Card 5: Redesign de Websites -->
+          <a href="https://decristony.github.io/Mendes-e-Advogados/" target="_blank" rel="noopener noreferrer"
+            class="sm:p-6 border-white/10 border ring-1 rounded-3xl pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg block">
+            <div class="flex items-center gap-3">
+              <div class="h-9 w-9 rounded-xl border flex items-center justify-center dynamic-border-20 dynamic-bg-10">
+                <svg aria-hidden="true" class="lucide lucide-refresh-cw h-5 w-5 text-white/80" data-lucide="refresh-cw"
+                  fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M3 21v-5h5"/>
+                </svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-geist tracking-tighter text-white">Redesign de Websites</h3>
+            </div>
+            <p class="mt-3 text-sm sm:text-base font-geist text-neutral-400">Transformação de sites antigos em experiências modernas, responsivas e de alto desempenho. Novo visual, mesma essência.</p>
+            <div class="mt-5 rounded-2xl overflow-hidden border border-white/10 bg-black/30">
+              <img alt="Redesign showcase" class="aspect-video w-full object-cover"
+                src="tumbs/redesign.png" />
+            </div>
+          </a>
+          <!-- Card 3: Image Transformation -->
           <div
             class="sm:p-6 border-white/10 border rounded-3xl ring-1 pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg">
             <div class="flex gap-3 gap-x-3 gap-y-3 items-center">
               <div class="h-9 w-9 rounded-xl border flex items-center justify-center dynamic-border-20 dynamic-bg-10">
-                <svg aria-hidden="true" class="lucide lucide-mouse-pointer-square-dashed h-5 w-5 text-white/80"
-                  data-lucide="mouse-pointer-square-dashed" fill="none" height="24" stroke="currentColor"
-                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
+                <svg aria-hidden="true" class="lucide lucide-images h-5 w-5 text-white/80"
+                  data-lucide="images" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24"
                   xmlns="http://www.w3.org/2000/svg">
-                  <path class=""
-                    d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z">
-                  </path>
-                  <path d="M5 3a2 2 0 0 0-2 2"></path>
-                  <path class="" d="M19 3a2 2 0 0 1 2 2"></path>
-                  <path d="M5 21a2 2 0 0 1-2-2"></path>
-                  <path d="M9 3h1"></path>
-                  <path class="" d="M9 21h2"></path>
-                  <path d="M14 3h1"></path>
-                  <path d="M3 9v1"></path>
-                  <path d="M21 9v2"></path>
-                  <path d="M3 14v1"></path>
+                  <path d="M18 22H4a2 2 0 0 1-2-2V6"/>
+                  <path d="M22 13V6a2 2 0 0 0-2-2H6"/>
+                  <path d="m9 17 3-3 3 3"/>
+                  <path d="m15 14 1.5-1.5a1.44 1.44 0 0 1 2 0L22 16.05"/>
+                  <path d="M2 18l3.5-3.5a1.44 1.44 0 0 1 2 0L10 16"/>
+                  <circle cx="9" cy="10" r="1.5"/>
                 </svg>
               </div>
-              <h3 class="sm:text-2xl text-xl text-white tracking-tighter font-geist">Design & Publicidade Digital</h3>
+              <h3 class="sm:text-2xl text-xl text-white tracking-tighter font-geist">Transformação Profissional de Imagens</h3>
             </div>
-            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3" style="">Criação de artes para redes
-              sociais, criativos para anúncios (Facebook Ads / Google Ads), Identidade Visual e edição masterizada de
-              imagens.</p>
-            <div class="mt-5 grid grid-cols-3 gap-3">
-              <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/30">
-                <img alt="Prototype 1" class="aspect-[4/3] w-full object-cover"
-                  src="assets/e3cdd41d-fb56-44c5-a49c-63a02e_f75b64518702.jpg" />
-              </div>
-              <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/30">
-                <img alt="Prototype 2" class="aspect-[4/3] w-full object-cover"
-                  src="assets/59e2de0e-1f59-4a87-90e5-3ac73a_29a7bea5fa12.png" />
-              </div>
-              <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/30">
-                <img alt="Prototype 3" class="aspect-[4/3] w-full object-cover"
-                  src="assets/32dcd344-e060-4889-80af-b42ecd_cbf125b4f53a.png" />
-              </div>
-            </div>
-          </div>
-          <!-- Card 4: Graphic Design (full width on lg) -->
-          <div
-            class="sm:p-6 lg:col-span-2 border-white/10 border ring-1 rounded-3xl pt-5 pr-5 pb-5 pl-5 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-lg">
-            <div class="flex gap-3 gap-x-3 gap-y-3 items-center">
-              <div class="h-9 w-9 rounded-xl border flex items-center justify-center dynamic-border-20 dynamic-bg-10">
-                <svg aria-hidden="true" class="" data-icon-replaced="true" data-icon-set="lucide"
-                  data-lucide="sun-medium" fill="none" height="20" stroke="currentColor" stroke-linecap="round"
-                  stroke-linejoin="round" stroke-width="2" style="color: rgb(255, 255, 255);" viewbox="0 0 24 24"
-                  width="20" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="4"></circle>
-                  <path d="M12 3v1"></path>
-                  <path d="M12 20v1"></path>
-                  <path d="M3 12h1"></path>
-                  <path d="M20 12h1"></path>
-                  <path d="m18.364 5.636-.707.707"></path>
-                  <path d="m6.343 17.657-.707.707"></path>
-                  <path d="m5.636 5.636.707.707"></path>
-                  <path d="m17.657 17.657.707.707"></path>
-                </svg>
-              </div>
-              <h3 class="sm:text-2xl text-xl text-white tracking-tighter font-geist">Design Systems & UX Avançado</h3>
-            </div>
-            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3">Padronização visual e escalabilidade para
-              projetos maiores, economizando tempo e mantendo altíssima qualidade de conversão e fidelidade à marca.</p>
-            <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="rounded-2xl overflow-hidden border border-white/10">
-                <img alt="Poster graphic" class="aspect-[16/10] w-full object-cover"
-                  src="assets/571b81bf-f918-4895-9ce4-c712a9_276989e27624.jpg" />
-              </div>
-              <div class="rounded-2xl overflow-hidden border border-white/10">
-                <img alt="3D render" class="aspect-[16/10] w-full object-cover"
-                  src="assets/54794e3a-303a-4fdc-969b-620128_7e766bab6262.png" />
-              </div>
-              <div class="rounded-2xl overflow-hidden border border-white/10">
-                <img alt="Scenic minimal" class="aspect-[16/10] w-full object-cover"
-                  src="assets/8b1ab6e3-dbcb-43e1-a0d8-7e78f5_0161b7d39290.png" />
+            <p class="sm:text-base text-sm text-neutral-400 font-geist mt-3">Edição profissional, restauração de fotos antigas, remoção de objetos, correção de cores e retoque avançado com qualidade de estúdio.</p>
+            <div class="comparator-container mt-5">
+              <div class="comparator-wrapper">
+                <div class="comparator-before-wrap">
+                  <img alt="Antes" src="tumbs/imagens/imagem tratada.png" draggable="false" />
+                </div>
+                <div class="comparator-after-wrap">
+                  <img alt="Depois" src="tumbs/imagens/modelo.jpeg" draggable="false" />
+                </div>
+                <div class="comparator-handle">
+                  <div class="comparator-handle-icon">
+                    <svg aria-hidden="true" class="lucide lucide-chevrons-left-right" data-lucide="chevrons-left-right" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m9 7-5 5 5 5"/>
+                      <path d="m15 7 5 5-5 5"/>
+                    </svg>
+                  </div>
+                </div>
+                <span class="comparator-label before-label">Antes</span>
+                <span class="comparator-label after-label">Depois</span>
               </div>
             </div>
           </div>
@@ -2222,6 +2252,54 @@
         btn.classList.remove('animating');
       }, 1650);
     }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var container = document.querySelector('.comparator-container');
+      if (!container) return;
+
+      var wrapper = container.querySelector('.comparator-wrapper');
+      var beforeWrap = container.querySelector('.comparator-before-wrap');
+      var afterWrap = container.querySelector('.comparator-after-wrap');
+      var handle = container.querySelector('.comparator-handle');
+      var isDragging = false;
+
+      function updateSlider(x) {
+        var rect = wrapper.getBoundingClientRect();
+        var percent = (x - rect.left) / rect.width;
+        percent = Math.max(0, Math.min(1, percent));
+        var pct = percent * 100;
+        beforeWrap.style.clipPath = 'inset(0 ' + (100 - pct) + '% 0 0)';
+        afterWrap.style.clipPath = 'inset(0 0 0 ' + pct + '%)';
+        handle.style.left = pct + '%';
+      }
+
+      function onStart(e) {
+        var target = e.type.indexOf('touch') !== -1 ? e.touches[0].target : e.target;
+        if (!target || !target.closest('.comparator-handle-icon, .comparator-handle')) return;
+        isDragging = true;
+        var x = e.type.indexOf('touch') !== -1 ? e.touches[0].clientX : e.clientX;
+        updateSlider(x);
+      }
+
+      function onMove(e) {
+        if (!isDragging) return;
+        var x = e.type.indexOf('touch') !== -1 ? e.touches[0].clientX : e.clientX;
+        updateSlider(x);
+      }
+
+      function onEnd() {
+        isDragging = false;
+      }
+
+      container.addEventListener('mousedown', onStart);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+
+      container.addEventListener('touchstart', onStart, { passive: true });
+      document.addEventListener('touchmove', onMove, { passive: true });
+      document.addEventListener('touchend', onEnd);
+    });
   </script>
 </body>
 

@@ -565,6 +565,38 @@
       touch-action: none;
     }
 
+    :root {
+      --accent-1: #fbbf24;
+      --accent-2: #d97706;
+    }
+
+    .dynamic-text {
+      color: var(--accent-1);
+      transition: color 0.5s ease;
+    }
+
+    .dynamic-border {
+      border-color: var(--accent-1);
+      transition: border-color 0.5s ease;
+    }
+
+    .dynamic-bg-10 {
+      background-color: color-mix(in srgb, var(--accent-1), transparent 90%);
+      transition: background-color 0.5s ease;
+    }
+
+    .dynamic-bg-20 {
+      background-color: color-mix(in srgb, var(--accent-1), transparent 80%);
+      transition: background-color 0.5s ease;
+    }
+
+    .dynamic-gradient {
+      background: linear-gradient(to right, var(--accent-1), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: all 0.5s ease;
+    }
+
     canvas {
       display: block;
       width: 100vw;
@@ -920,8 +952,7 @@
         <!-- Navigation Links -->
         <div class="hidden md:flex space-x-8 items-center">
           <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="index.html">Home</a>
-          <a class="transition hover:text-white text-sm text-neutral-300 font-geist"
-            href="portfolio.html">Portfólio</a>
+          <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="portfolio.html">Portfólio</a>
           <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="servicos.html">Serviços</a>
           <a class="transition hover:text-white text-sm text-neutral-300 font-geist" href="contato.html">Contato</a>
         </div>
@@ -947,7 +978,7 @@
   <header class="sm:px-6 lg:px-8 md:pt-16 max-w-7xl mr-auto ml-auto pt-10 pr-4 pl-4" id="about">
     <div
       class="inline-flex items-center gap-2 rounded-full border bg-white/[0.03] px-3 py-1.5 shadow-sm backdrop-blur border-white/10">
-      <svg aria-hidden="true" class="lucide lucide-badge-check h-4 w-4 text-emerald-400" data-lucide="badge-check"
+      <svg aria-hidden="true" class="lucide lucide-badge-check h-4 w-4 dynamic-text" data-lucide="badge-check"
         fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
         <path
@@ -958,133 +989,140 @@
       <span class="text-[13px] leading-none text-neutral-300 font-geist">Casos de Sucesso</span>
     </div>
     <h1 class="sm:text-5xl lg:text-6xl text-4xl tracking-tighter font-geist mt-6 text-neutral-100">Meus <span
-        class="tracking-tighter font-geist text-emerald-400">Projetos</span></h1>
-    <p class="mt-3 text-base sm:text-lg max-w-3xl font-geist text-neutral-400">
-      Esses são os cases reais criados para clientes, com foco em design dinâmico, performance extrema e conversão.<br>
+        class="tracking-tighter font-geist dynamic-text">Projetos</span></h1>
+    <p class="mt-3 text-base sm:text-lg max-w-3xl font-geist text-neutral-100">
+      Esses são os cases reais criados para clientes, com foco em design dinâmico, performance extrema e resultados.<br>
       Explore os resultados da união entre estratégia e tecnologia.
     </p>
   </header>
   <main class="md:mt-12 mt-8">
     <div class="sm:px-6 lg:px-8 max-w-7xl mr-auto ml-auto pr-4 pl-4">
-      <!-- Filtros de Projetos -->
+      <!-- Filtros de Serviços -->
       <div class="flex flex-wrap items-center justify-center gap-3 mb-12 mt-8">
-        <button onclick="filterProjects('all'); triggerParticles(this)" class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-500/10 px-6 py-2.5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all" id="btn-all">Todos</button>
-        <button onclick="filterProjects('site'); triggerParticles(this)" class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all" id="btn-site">Sites</button>
-        <button onclick="filterProjects('ads'); triggerParticles(this)" class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all" id="btn-ads">Peças Publicitárias</button>
-        <button onclick="filterProjects('social'); triggerParticles(this)" class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all" id="btn-social">Social Media</button>
-        <button onclick="filterProjects('photo'); triggerParticles(this)" class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all" id="btn-photo">Edição de Fotos</button>
+        <button onclick="filterProjects('all'); triggerParticles(this)"
+          class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border dynamic-border dynamic-bg-10 px-6 py-2.5 text-sm font-medium dynamic-text hover:dynamic-bg-20 transition-all"
+          id="btn-all">Todos</button>
+        <button onclick="filterProjects('websites'); triggerParticles(this)"
+          class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all"
+          id="btn-websites">Websites</button>
+        <button onclick="filterProjects('menus'); triggerParticles(this)"
+          class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all"
+          id="btn-menus">Menus</button>
+        <button onclick="filterProjects('redesign'); triggerParticles(this)"
+          class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all"
+          id="btn-redesign">Redesign</button>
+        <button onclick="filterProjects('imagens'); triggerParticles(this)"
+          class="particle-btn filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all"
+          id="btn-imagens">Imagens</button>
       </div>
 
-      <!-- Bento Grid / Coleção de Projetos -->
+      <!-- Grid de Serviços -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="projects-grid">
-        
-        <!-- Projeto 1: Site -->
-        <div class="project-card site relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
+
+        <!-- Serviço: Criação de Websites Profissionais -->
+        <a href="https://decristony.github.io/Aura-Premium/" target="_blank" rel="noopener noreferrer"
+          class="project-card websites relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px] block">
           <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
-            <img src="assets/bf072b5e-1c5d-4961-91f2-3bf3e6_ad5ec1651e2b.png" alt="Criação de Website" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
+            <img src="tumbs/mockup liora (1).png" alt="Criação de Websites"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
             <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent"></div>
           </div>
           <div class="absolute bottom-0 w-full p-6 flex flex-col gap-2">
             <div class="flex gap-2">
-              <span class="inline-flex items-center text-[11px] font-geist text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-1">WordPress</span>
-              <span class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">E-Commerce</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-1">Landing
+                Pages</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">SEO</span>
             </div>
-            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Loja Moda Premium</h3>
-            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Plataforma de alta conversão estruturada com design system único.</p>
+            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Liora aura</h3>
+            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Sites modernos, responsivos e focados em
+              conversão com performance máxima.</p>
           </div>
-        </div>
+        </a>
 
-        <!-- Projeto 2: Social Media -->
-        <div class="project-card social relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
+        <!-- Serviço: Odonto Vita -->
+        <a href="https://decristony.github.io/OdontoVitta/" target="_blank" rel="noopener noreferrer"
+          class="project-card websites relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px] block">
           <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
-            <img src="assets/e3cdd41d-fb56-44c5-a49c-63a02e_f75b64518702.jpg" alt="Social Media" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
+            <img src="tumbs/mockup odonto vita (1).png" alt="Odonto Vita"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
             <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent"></div>
           </div>
           <div class="absolute bottom-0 w-full p-6 flex flex-col gap-2">
             <div class="flex gap-2">
-              <span class="inline-flex items-center text-[11px] font-geist text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-2 py-1">Photoshop</span>
-              <span class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">Identidade</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-1">Landing
+                Pages</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">SEO</span>
             </div>
-            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Campanha Lançamento</h3>
-            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Peças dinâmicas criadas para Instagram e TikTok.</p>
+            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Odonto Vita</h3>
+            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Site profissional para clínica odontológica com
+              design moderno e responsivo.</p>
           </div>
-        </div>
+        </a>
 
-        <!-- Projeto 3: Ads -->
-        <div class="project-card ads relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
+        <!-- Serviço: Criação de Menus Profissionais -->
+        <a href="https://decristony.github.io/Luxury-Cardapio/" target="_blank" rel="noopener noreferrer"
+          class="project-card menus relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px] block">
           <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
-            <img src="assets/32dcd344-e060-4889-80af-b42ecd_cbf125b4f53a.png" alt="Peças Publicitárias" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
+            <img src="tumbs/mockup menu.webp" alt="Criação de Menus"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
             <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent"></div>
           </div>
           <div class="absolute bottom-0 w-full p-6 flex flex-col gap-2">
             <div class="flex gap-2">
-              <span class="inline-flex items-center text-[11px] font-geist text-orange-300 bg-orange-500/10 border border-orange-500/20 rounded-full px-2 py-1">Meta Ads</span>
-              <span class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">Conversão</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-2 py-1">Cardápios</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">Restaurantes</span>
             </div>
-            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Criativos de Tráfego</h3>
-            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Testes A/B focados em CTR para funil de vendas direto.</p>
+            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Criação de Menus Profissionais</h3>
+            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Cardápios digitais interativos e menus visuais
+              para restaurantes e eventos.</p>
           </div>
-        </div>
+        </a>
 
-        <!-- Projeto 4: Site -->
-        <div class="project-card site lg:col-span-2 relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
+        <!-- Serviço: Redesign de Websites -->
+        <a href="https://decristony.github.io/Mendes-e-Advogados/" target="_blank" rel="noopener noreferrer"
+          class="project-card redesign relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px] block">
           <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
-            <img src="assets/571b81bf-f918-4895-9ce4-c712a9_276989e27624.jpg" alt="Design Digital" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
-            <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/40 to-transparent"></div>
-          </div>
-          <div class="absolute bottom-0 w-full p-6 flex flex-col gap-2 w-full md:w-1/2">
-            <div class="flex gap-2">
-              <span class="inline-flex items-center text-[11px] font-geist text-purple-300 bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-1">UI/UX</span>
-              <span class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">Figma</span>
-            </div>
-            <h3 class="text-3xl font-geist text-white tracking-tight mt-1">App & Dashboard</h3>
-            <p class="text-sm text-neutral-400 font-geist">Escalabilidade com um Design System coeso.</p>
-          </div>
-        </div>
-
-        <!-- Projeto 5: Social Media -->
-        <div class="project-card social relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
-          <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
-            <img src="assets/59e2de0e-1f59-4a87-90e5-3ac73a_29a7bea5fa12.png" alt="Social Media" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
+            <img src="tumbs/redesign.png" alt="Redesign de Websites"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
             <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent"></div>
           </div>
           <div class="absolute bottom-0 w-full p-6 flex flex-col gap-2">
             <div class="flex gap-2">
-              <span class="inline-flex items-center text-[11px] font-geist text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-2 py-1">Illustrator</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-purple-300 bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-1">Modernização</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">Performance</span>
             </div>
-            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Branding</h3>
-            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Identidade digital que comunica diretamente a essência da marca.</p>
+            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Redesign de Websites</h3>
+            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Transformação de sites antigos em experiências
+              modernas e de alto desempenho.</p>
           </div>
-        </div>
+        </a>
 
-        <!-- Projeto 6: Edição de Fotos -->
-        <div class="project-card photo relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
+        <!-- Serviço: Transformação Profissional de Imagens -->
+        <div
+          class="project-card imagens relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
           <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
-            <img src="assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" alt="Edição de Fotos" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
+            <img src="tumbs/imagens/imagem tratada.png" alt="Transformação de Imagens"
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
             <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent"></div>
           </div>
           <div class="absolute bottom-0 w-full p-6 flex flex-col gap-2">
             <div class="flex gap-2">
-              <span class="inline-flex items-center text-[11px] font-geist text-rose-300 bg-rose-500/10 border border-rose-500/20 rounded-full px-2 py-1">Photoshop</span>
-              <span class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">Retouching</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-orange-300 bg-orange-500/10 border border-orange-500/20 rounded-full px-2 py-1">Edição</span>
+              <span
+                class="inline-flex items-center text-[11px] font-geist text-white/70 bg-white/5 border border-white/10 rounded-full px-2 py-1">Retoque</span>
             </div>
-            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Tratamento de Pele PRO</h3>
-            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Edição masterizada com separação de frequências e dodge & burn.</p>
-          </div>
-        </div>
-
-        <!-- Projeto 7: Edição de Fotos -->
-        <div class="project-card photo relative shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden border rounded-3xl backdrop-blur-lg border-white/10 group cursor-pointer h-[400px]">
-          <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
-            <img src="assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp" alt="Manipulação de Imagem" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100" />
-            <div class="absolute inset-0 bg-gradient-to-t from-[#030305] via-[#030305]/60 to-transparent"></div>
-          </div>
-          <div class="absolute bottom-0 w-full p-6 flex flex-col gap-2">
-            <div class="flex gap-2">
-              <span class="inline-flex items-center text-[11px] font-geist text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-1">Composição</span>
-            </div>
-            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Manipulação Criativa</h3>
-            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Criação de cenários surreais e integração de luz avançada.</p>
+            <h3 class="text-2xl font-geist text-white tracking-tight mt-1">Transformação Profissional de Imagens</h3>
+            <p class="text-sm text-neutral-400 font-geist line-clamp-2">Edição, restauração, remoção de objetos e
+              retoque avançado com qualidade de estúdio.</p>
           </div>
         </div>
 
@@ -1092,25 +1130,23 @@
 
       <script>
         function filterProjects(category) {
-          const cards = document.querySelectorAll('.project-card');
-          const btns = document.querySelectorAll('.filter-btn');
-          
-          // Update button styles
-          btns.forEach(btn => {
+          var cards = document.querySelectorAll('.project-card');
+          var btns = document.querySelectorAll('.filter-btn');
+
+          btns.forEach(function (btn) {
             btn.className = "filter-btn inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-2.5 text-sm font-medium text-neutral-200 hover:bg-white/10 transition-all";
           });
-          
-          const activeBtn = document.getElementById('btn-' + category);
+
+          var activeBtn = document.getElementById('btn-' + category);
           activeBtn.className = "filter-btn inline-flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-500/10 px-6 py-2.5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all";
 
-          // Filter projects
-          cards.forEach(card => {
-            if(category === 'all' || card.classList.contains(category)) {
+          cards.forEach(function (card) {
+            if (category === 'all' || card.classList.contains(category)) {
               card.style.display = 'block';
-              setTimeout(() => card.style.opacity = '1', 50);
+              setTimeout(function () { card.style.opacity = '1'; }, 50);
             } else {
               card.style.opacity = '0';
-              setTimeout(() => card.style.display = 'none', 300);
+              setTimeout(function () { card.style.display = 'none'; }, 300);
             }
           });
         }
@@ -1125,7 +1161,8 @@
           class="flex flex-col sm:flex-row sm:items-center sm:p-6 border-white/10 border rounded-2xl pt-5 pr-5 pb-5 pl-5 backdrop-blur-lg gap-x-4 gap-y-4 items-start justify-between">
           <div class="">
             <h3 class="text-lg sm:text-xl font-semibold tracking-tight font-geist text-white">Dê o próximo passo</h3>
-            <p class="text-sm text-neutral-400 font-geist mt-1">Quer tirar um projeto do papel ou melhorar seus resultados de vendas hoje? Estou pronto para atuar.</p>
+            <p class="text-sm text-neutral-400 font-geist mt-1">Quer tirar um projeto do papel ou melhorar seus
+              resultados de vendas hoje? Estou pronto para atuar.</p>
           </div>
           <a class="group inline-flex items-center gap-2 transition hover:bg-white/20 text-sm font-medium text-neutral-100 bg-white/10 border-white/10 border rounded-full pt-2 pr-4 pb-2 pl-4"
             href="#">
@@ -1154,7 +1191,8 @@
         <!-- Brand Column -->
         <div class="md:col-span-2">
           <h3 class="text-lg font-semibold tracking-tight font-geist mb-3 text-white">Tony (Decristony)</h3>
-          <p class="text-sm text-neutral-400 font-geist max-w-md mb-4">Perfil Completo: design + código + marketing. Visão estratégica de negócio usando IA para ganho máximo de resultados do cliente.</p>
+          <p class="text-sm text-neutral-400 font-geist max-w-md mb-4">Perfil Completo: design + código + marketing.
+            Visão estratégica de negócio usando IA para ganho máximo de resultados do cliente.</p>
           <div class="flex gap-3 gap-x-3 gap-y-3 items-center">
             <a class="group inline-flex items-center justify-center hover:bg-white/[0.06] transition w-9 h-9 border-white/10 border rounded-full"
               href="#">
@@ -1209,10 +1247,12 @@
         <div class="">
           <h4 class="text-sm font-medium mb-3 font-geist text-white">Soft / Hard Skills</h4>
           <ul class="text-sm text-neutral-400 space-y-2">
-            <li class=""><a class="transition hover:text-white font-geist" href="#services">Web Designer (WP, Code)</a></li>
-            <li class=""><a class="transition font-geist hover:text-white" href="#services">Tráfego & Ecommerce</a></li>
-            <li class=""><a class="transition font-geist hover:text-white" href="#services">UX / UI / Landing Pages</a></li>
-            <li class=""><a class="transition font-geist hover:text-white" href="#">Ad Creatives & IA</a></li>
+            <li class=""><a class="transition hover:text-white font-geist" href="#services">Web Designer (WP, Code)</a>
+            </li>
+            <li class=""><a class="transition font-geist hover:text-white" href="#services">Redesign & Otimização</a></li>
+            <li class=""><a class="transition font-geist hover:text-white" href="#services">UX / UI / Landing Pages</a>
+            </li>
+            <li class=""><a class="transition font-geist hover:text-white" href="#">Otimização de Imagens</a></li>
           </ul>
         </div>
         <!-- Contact Column -->
@@ -1226,7 +1266,8 @@
       </div>
       <div
         class="flex flex-col sm:flex-row gap-4 border-white/10 border-t mt-8 pt-8 gap-x-4 gap-y-4 items-center justify-between">
-        <p class="text-xs font-geist text-neutral-400">© 2026 Tony (Decristony) — Todos os direitos reservados. Design, código e estratégia no mesmo lugar 🚀</p>
+        <p class="text-xs font-geist text-neutral-400">© 2026 Tony (Decristony) — Todos os direitos reservados. Design,
+          código e estratégia no mesmo lugar 🚀</p>
         &lt;
       </div>
     </div>

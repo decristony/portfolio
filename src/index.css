@@ -3324,36 +3324,20 @@ body:has(.case[data-tone='dark']) .nav__link.is-active {
 
 
 /* ===== Página do projeto: anterior e próximo nas laterais do post =====
-   Pílulas de vidro compridas, presas na altura do meio da tela, encostadas
-   nas bordas do post (metade sobre ele). */
+   Quadrados de vidro com cantos arredondados e só a seta, presos na altura do
+   meio da tela, encostados nas bordas do post (metade sobre ele). */
 .case__side {
-  --side-w: 44px;
+  --side-w: 46px;
   position: fixed;
   top: 50%;
   z-index: 35;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  display: grid;
+  place-items: center;
   width: var(--side-w);
-  height: clamp(132px, 22vh, 190px);
-  padding: 14px 0;
-  border-radius: 999px;
+  height: var(--side-w);
+  border-radius: 14px;
   translate: 0 -50%;
-  font-size: 11px;
-  letter-spacing: 0.04em;
   transition: transform 0.3s var(--ease), background-color 0.3s var(--ease);
-}
-
-.case__side-name {
-  writing-mode: vertical-rl;
-  white-space: nowrap;
-  opacity: 0.75;
-}
-
-.case__side--prev .case__side-name {
-  transform: rotate(180deg); /* lê de baixo para cima, de frente para o post */
 }
 
 /* desktop: nas bordas do post, entre o painel e o minimapa */
@@ -3382,8 +3366,8 @@ body:has(.case[data-tone='dark']) .nav__link.is-active {
 /* celular e tablet: o post ocupa a largura toda; os botões ficam na borda da tela */
 @media (max-width: 1099px) {
   .case__side {
-    --side-w: 38px;
-    height: 128px;
+    --side-w: 42px;
+    border-radius: 12px;
   }
   .case__side--prev {
     left: 6px;

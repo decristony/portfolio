@@ -17,7 +17,7 @@ const { site, projects } = portfolioData;
  * Página do projeto.
  * Ordem de entrada: menu e post (centro) → minimapa (direita) → informações
  * (esquerda), que abre por último, com um feixe de vidro, quando tudo carregou.
- * Anterior/próximo: botões compridos e flutuantes nas laterais do post, para
+ * Anterior/próximo: botões quadrados e flutuantes nas laterais do post, para
  * passar de um projeto para outro sem voltar para Projetos.
  */
 export function Project() {
@@ -226,7 +226,7 @@ export function Project() {
 
       </aside>
 
-      {/* anterior e próximo: botões compridos e flutuantes nas laterais do post */}
+      {/* anterior e próximo: botões quadrados e flutuantes nas laterais do post */}
       <Link
         className="case__side case__side--prev glass"
         to={`/project/${previous.slug}`}
@@ -234,8 +234,7 @@ export function Project() {
         onClick={playClick}
         aria-label={`Projeto anterior: ${capitalize(previous.title)}`}
       >
-        <IconArrowLeft size={14} />
-        <span className="case__side-name">{capitalize(previous.title)}</span>
+        <IconArrowLeft size={16} />
       </Link>
       <Link
         className="case__side case__side--next glass"
@@ -244,8 +243,7 @@ export function Project() {
         onClick={playClick}
         aria-label={`Próximo projeto: ${capitalize(next.title)}`}
       >
-        <span className="case__side-name">{capitalize(next.title)}</span>
-        <IconArrowRight size={14} />
+        <IconArrowRight size={16} />
       </Link>
     </main>
   );

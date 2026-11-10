@@ -4,7 +4,7 @@ import { useSound } from '../../context/SoundContext';
 import { useCopyToClipboard } from '../../hooks/useUI';
 import { useLiveClock } from '../../hooks/useLiveClock';
 import { LogoMark } from './LogoMark';
-import { IconMenu } from '../Icons';
+import { IconArrowLeft, IconMenu } from '../Icons';
 
 const { site, labels } = portfolioData;
 
@@ -37,6 +37,13 @@ export function Nav({ onMenu }) {
               <strong>{site.name.split(' ')[0]}</strong>
               <span>OrvionWeb</span>
             </span>
+            {/* fora do início, um atalho para voltar a ele */}
+            {pathname !== '/' && (
+              <Link to="/" className="nav__home" onMouseEnter={playHover} onClick={playClick}>
+                <IconArrowLeft size={11} />
+                Início
+              </Link>
+            )}
           </div>
           <nav className="nav__links" aria-label="Principal">
             {LINKS.map((link) => (

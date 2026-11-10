@@ -17,8 +17,8 @@ const { site, projects } = portfolioData;
  * Página do projeto.
  * Ordem de entrada: menu e post (centro) → minimapa (direita) → informações
  * (esquerda), que abre por último, com um feixe de vidro, quando tudo carregou.
- * Anterior/próximo ficam no painel e no fim do post: dá para passar de um
- * projeto para outro sem voltar para Projetos.
+ * Anterior/próximo: botões compridos e flutuantes nas laterais do post, para
+ * passar de um projeto para outro sem voltar para Projetos.
  */
 export function Project() {
   const { slug } = useParams();
@@ -224,43 +224,29 @@ export function Project() {
           </span>
         )}
 
-        <nav className="case__pager" aria-label="Outros projetos">
-          <Link
-            to={`/project/${previous.slug}`}
-            onMouseEnter={playHover}
-            onClick={playClick}
-            tabIndex={infoOpen ? 0 : -1}
-            aria-label={`Projeto anterior: ${capitalize(previous.title)}`}
-          >
-            <IconArrowLeft size={12} />
-            <span>{capitalize(previous.title)}</span>
-          </Link>
-          <Link
-            to={`/project/${next.slug}`}
-            onMouseEnter={playHover}
-            onClick={playClick}
-            tabIndex={infoOpen ? 0 : -1}
-            aria-label={`Próximo projeto: ${capitalize(next.title)}`}
-          >
-            <span>{capitalize(next.title)}</span>
-            <IconArrowRight size={12} />
-          </Link>
-        </nav>
       </aside>
 
-      {/* fim do post: segue para o próximo projeto (e volta para o anterior) */}
-      <nav className="case__end" aria-label="Outros projetos">
-        <Link className="case__next" to={`/project/${next.slug}`} onMouseEnter={playHover} onClick={playClick}>
-          <span className="case__next-label">Próximo projeto</span>
-          <strong className="case__next-title">{next.title}</strong>
-          <span className="case__next-cat">{next.category}</span>
-          <IconArrowRight size={22} className="case__next-arrow" />
-        </Link>
-        <Link className="case__prev" to={`/project/${previous.slug}`} onMouseEnter={playHover} onClick={playClick}>
-          <IconArrowLeft size={12} />
-          <span>Projeto anterior: {capitalize(previous.title)}</span>
-        </Link>
-      </nav>
+      {/* anterior e próximo: botões compridos e flutuantes nas laterais do post */}
+      <Link
+        className="case__side case__side--prev glass"
+        to={`/project/${previous.slug}`}
+        onMouseEnter={playHover}
+        onClick={playClick}
+        aria-label={`Projeto anterior: ${capitalize(previous.title)}`}
+      >
+        <IconArrowLeft size={14} />
+        <span className="case__side-name">{capitalize(previous.title)}</span>
+      </Link>
+      <Link
+        className="case__side case__side--next glass"
+        to={`/project/${next.slug}`}
+        onMouseEnter={playHover}
+        onClick={playClick}
+        aria-label={`Próximo projeto: ${capitalize(next.title)}`}
+      >
+        <span className="case__side-name">{capitalize(next.title)}</span>
+        <IconArrowRight size={14} />
+      </Link>
     </main>
   );
 }

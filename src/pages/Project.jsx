@@ -5,6 +5,7 @@ import { useDocumentTitle } from '../hooks/useUI';
 import { useSound } from '../context/SoundContext';
 import { useProjectTheme } from '../hooks/useProjectTheme';
 import { CASE } from '../lib/caseLayout';
+import { releaseGlassReveal } from '../components/layout/GlassReveal';
 import { IconArrowLeft, IconArrowRight, IconArrowUpRight } from '../components/Icons';
 import { capitalize, madeFor } from '../lib/projectText';
 import { Ambience } from '../components/backdrops/Ambience';
@@ -54,6 +55,11 @@ export function Project() {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, []);
+
+  // a bolha de vidro do clique só some quando o post já está na tela
+  useEffect(() => {
+    if (postReady) releaseGlassReveal();
+  }, [postReady]);
 
   // sequência de entrada
   useEffect(() => {
@@ -138,6 +144,9 @@ export function Project() {
       <figure className="case__post" ref={postRef}>
         <img
           src={project.post}
+          srcSet={`${project.postSmall} 800w, ${project.post} 1400w`}
+          sizes="(max-width: 1099px) 100vw, 62vw"
+          decoding="async"
           alt={`${capitalize(project.title)}: apresentação do projeto`}
           onLoad={() => setPostReady(true)}
           ref={(img) => {
@@ -158,7 +167,7 @@ export function Project() {
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          <img src={project.post} alt="" draggable="false" />
+          <img src={project.postSmall} alt="" draggable="false" decoding="async" />
           <span className="case__map-lens" ref={lensRef} aria-hidden="true" />
         </div>
       </aside>

@@ -1,8 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { asset } from '../lib/asset';
 
 const SoundContext = createContext({
   soundEnabled: false,
   toggleSound: () => {},
+  setSound: () => {},
   playHover: () => {},
   playClick: () => {},
   playOpen: () => {},
@@ -31,9 +33,9 @@ export function SoundProvider({ children }) {
     };
 
     cache.current = {
-      hover: create('/sounds/hover.mp3', 0.18),
-      click: create('/sounds/click.mp3', 0.3),
-      open: create('/sounds/open.mp3', 0.26),
+      hover: create(asset('/sounds/hover.mp3'), 0.18),
+      click: create(asset('/sounds/click.mp3'), 0.3),
+      open: create(asset('/sounds/open.mp3'), 0.26),
     };
   }, []);
 
@@ -58,6 +60,16 @@ export function SoundProvider({ children }) {
   const playOpen = useCallback(() => play('open', 0.24), [play]);
   const playTransition = useCallback(() => play('open', 0.18), [play]);
 
+  // liga ou desliga sem tocar o clique (usado pela escolha da abertura)
+  const setSound = useCallback((on) => {
+    setSoundEnabled(Boolean(on));
+    try {
+      localStorage.setItem(STORAGE_KEY, String(Boolean(on)));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const toggleSound = useCallback(() => {
     setSoundEnabled((previous) => {
       const next = !previous;
@@ -79,7 +91,7 @@ export function SoundProvider({ children }) {
 
   return (
     <SoundContext.Provider
-      value={{ soundEnabled, toggleSound, playHover, playClick, playOpen, playTransition }}
+      value={{ soundEnabled, toggleSound, setSound, playHover, playClick, playOpen, playTransition }}
     >
       {children}
     </SoundContext.Provider>

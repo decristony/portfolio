@@ -5,6 +5,7 @@ import { playGlassReveal } from '../components/layout/GlassReveal';
 import { casePostRect } from '../lib/caseLayout';
 import { madeFor } from '../lib/projectText';
 import { hasWebGL } from '../lib/webgl';
+import { loadIntro } from '../lib/intro';
 import { portfolioData, padIndex } from '../data/portfolioData';
 import { useBodyLock, useDocumentTitle, useMediaQuery, usePrefersReducedMotion } from '../hooks/useUI';
 import { useSound } from '../context/SoundContext';
@@ -52,7 +53,7 @@ export function Work() {
   const [hovered, setHovered] = useState(null);
   const controls = useRef(null);
   const reduced = usePrefersReducedMotion();
-  const { playClick, playHover, playOpen } = useSound();
+  const { playClick, playHover, playOpen, soundEnabled } = useSound();
   const navigate = useNavigate();
   const opening = useRef(false);
   const project = projects[focus];
@@ -60,6 +61,28 @@ export function Work() {
   // sem hover (celular/tablet): a ficha mostra sempre o projeto em foco
   const compact = useMediaQuery('(max-width: 1099px), (hover: none)');
   const info = compact ? project : hovered === null ? null : projects[hovered];
+
+  // ambiente lo-fi japonês bem baixo enquanto Projetos está aberto e o som está ligado
+  useEffect(() => {
+    if (!soundEnabled) {
+      window.OrvionLofi?.stop();
+      return undefined;
+    }
+    let alive = true;
+    // o navegador só libera o áudio depois de um gesto: tenta de novo no primeiro clique/tecla
+    const wake = () => window.OrvionSound?.resume();
+    loadIntro().then(() => {
+      if (alive) window.OrvionLofi.start();
+    });
+    window.addEventListener('pointerdown', wake, { once: true });
+    window.addEventListener('keydown', wake, { once: true });
+    return () => {
+      alive = false;
+      window.removeEventListener('pointerdown', wake);
+      window.removeEventListener('keydown', wake);
+      window.OrvionLofi?.stop();
+    };
+  }, [soundEnabled]);
 
   useDocumentTitle(`Projetos — ${site.name}`);
   useBodyLock(true);

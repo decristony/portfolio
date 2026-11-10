@@ -1,0 +1,328 @@
+/* Abertura do portfólio (intro.js). Usada pelo site e por preview/abertura.html. */
+
+.oi {
+  --oi-night: #141414;
+  --oi-paper: #f4f2ed;
+  --oi-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --oi-display: 'Glyphius', 'Times New Roman', serif;
+  --oi-sans: 'Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  color: var(--oi-paper);
+  font-family: var(--oi-sans);
+  transition: opacity 0.6s var(--oi-ease);
+}
+
+/* "hidden" vale mesmo com display definido nas classes abaixo */
+.oi [hidden] {
+  display: none !important;
+}
+
+.oi.is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* durante a bolha, só ela recebe atenção: dá para clicar no site já revelado */
+.oi.is-revealing {
+  pointer-events: none;
+}
+
+/* a página: tinta da marca TD, com grão */
+.oi-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--oi-night);
+}
+
+.oi-grain {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: oi-grain 0.8s steps(2) infinite;
+}
+
+@keyframes oi-grain {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-3%, 2%); }
+  100% { transform: translate(2%, -3%); }
+}
+
+/* ---------- portão: entrar com ou sem som ---------- */
+.oi-gate {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  text-align: center;
+  transition: opacity 0.45s var(--oi-ease), transform 0.45s var(--oi-ease);
+}
+
+.oi-gate.is-out {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.oi-gate__mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(244, 242, 237, 0.22);
+  border-radius: 14px;
+  font-family: var(--oi-display);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.oi-gate__hint {
+  margin: 0;
+  max-width: 30ch;
+  color: rgba(244, 242, 237, 0.62);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.oi-gate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.oi-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid rgba(244, 242, 237, 0.28);
+  border-radius: 999px;
+  background: rgba(244, 242, 237, 0.08);
+  color: var(--oi-paper);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.oi-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: rgba(244, 242, 237, 0.62);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .oi-btn:hover {
+    background: rgba(244, 242, 237, 0.16);
+  }
+  .oi-btn--ghost:hover {
+    color: var(--oi-paper);
+    background: transparent;
+  }
+}
+
+.oi-btn:focus-visible {
+  outline: 2px solid var(--oi-paper);
+  outline-offset: 3px;
+}
+
+.oi-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 12px;
+}
+
+.oi-wave i {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: currentColor;
+  animation: oi-wave 1s ease-in-out infinite;
+}
+
+.oi-wave i:nth-child(2) { animation-delay: -0.2s; }
+.oi-wave i:nth-child(3) { animation-delay: -0.4s; }
+.oi-wave i:nth-child(4) { animation-delay: -0.6s; }
+
+@keyframes oi-wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+/* ---------- digitação ---------- */
+.oi-hello {
+  position: absolute;
+  z-index: 1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: clamp(38px, 5.2vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: opacity 0.26s ease;
+}
+
+.oi-hello::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  margin-right: 14px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.oi-hello.is-out {
+  opacity: 0;
+}
+
+.oi-type {
+  position: relative;
+  z-index: 1;
+  padding: 0 24px;
+  text-align: center;
+  transition: transform 1.2s var(--oi-ease), opacity 0.9s var(--oi-ease), filter 0.9s var(--oi-ease);
+}
+
+.oi-type.is-out {
+  transform: scale(1.25);
+  opacity: 0;
+  filter: blur(8px);
+}
+
+.oi-type p {
+  margin: 0;
+  min-height: 0.95em;
+  font-family: var(--oi-display);
+  font-size: clamp(44px, 8vw, 124px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.oi-type p + p {
+  opacity: 0.5;
+}
+
+/* a barrinha de digitação, a mesma do começo ao fim */
+.oi-caret {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.86em;
+  margin-left: 0.05em;
+  background: currentColor;
+  transform: translateY(0.06em);
+}
+
+.oi-caret.is-off {
+  opacity: 0;
+}
+
+/* ---------- bolha de vidro (como a do clique num projeto) ---------- */
+.oi-rim {
+  --edge: 85%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  translate: -50% -50%;
+  /* só a faixa da borda refrata: desfoca, satura e clareia o que passa por ela */
+  -webkit-backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
+  backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
+  -webkit-mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
+  mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    inset 0 0 40px rgba(255, 255, 255, 0.18),
+    0 0 60px rgba(255, 255, 255, 0.12);
+}
+
+/* aberração cromática fina: duas bordas coloridas levemente deslocadas */
+.oi-rim::before,
+.oi-rim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+
+.oi-rim::before {
+  box-shadow: inset 2px 0 0 rgba(255, 70, 90, 0.45);
+}
+
+.oi-rim::after {
+  box-shadow: inset -2px 0 0 rgba(60, 200, 255, 0.45);
+}
+
+/* o site atrás da bolha entra com zoom e foco, como se a câmera chegasse nele */
+.oi-zoom-in {
+  animation: oi-zoom-in 1.7s cubic-bezier(0.45, 0, 0.2, 1) both;
+  transform-origin: 50% 50%;
+}
+
+@keyframes oi-zoom-in {
+  from {
+    transform: scale(1.14);
+    filter: blur(10px) saturate(1.2);
+  }
+  to {
+    transform: none;
+    filter: none;
+  }
+}
+
+/* botão discreto para pular */
+.oi-skip {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 3;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--oi-paper);
+  font: inherit;
+  font-size: 12px;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+.oi-skip:hover,
+.oi-skip:focus-visible {
+  opacity: 1;
+}
+
+.oi-skip:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.oi.is-revealing .oi-skip {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oi-grain,
+  .oi-wave i,
+  .oi-zoom-in {
+    animation: none;
+  }
+}

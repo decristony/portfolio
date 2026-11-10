@@ -12,11 +12,19 @@ npm run preview  # serve o dist/ localmente
 npm run lint
 ```
 
-## Publicar na Vercel
+## Publicar
 
-O `vercel.json` já define o build (`npm run build` → `dist/`), o redirecionamento de
-todas as rotas para o `index.html` (React Router) e o cache dos arquivos estáticos.
-Basta importar a pasta `portfolio/` como projeto na Vercel, ou rodar `npx vercel` aqui.
+- **GitHub Pages** (https://decristony.github.io/portfolio/): automático a cada envio para a
+  `main`, pelo workflow `.github/workflows/pages.yml` (build com `VITE_BASE=/portfolio/`).
+- **Vercel**: o `vercel.json` já define o build, as rotas do React Router e o cache.
+
+Os caminhos de `public/` passam por `src/lib/asset.js`, que soma a base do site.
+
+## Abertura e som
+
+A abertura (primeira visita da sessão) e o som (digitação e lo-fi de Projetos) ficam em
+`public/intro/intro.js` e `intro.css`, sem build. A prévia `preview/abertura.html` usa os
+mesmos arquivos: dá para ver a abertura com dois cliques, sem rodar o site.
 
 ## Estrutura
 
@@ -42,10 +50,11 @@ public/
 
 Tudo fica em `src/data/portfolioData.js`, na lista `rawProjects`:
 
-- `cover`: capa do Behance em `public/projects/orvion/<slug>.jpg` (ou `null` para a capa
-  genérica feita com a paleta).
-- O post da página do projeto é `public/projects/orvion/post/<slug>.jpg` e o recorte da
-  transição de clique é `public/projects/orvion/hero/<slug>.jpg` (topo do post, 1400×1820).
+- `cover`: capa em `public/projects/orvion/<slug>.webp` (ou `null` para a capa genérica
+  feita com a paleta).
+- Post da página do projeto: `post/<slug>.webp` (1400 px) e `post/<slug>-800.webp` (celular e
+  minimapa). Recorte da transição de clique: `hero/<slug>.webp` (topo do post, 1400×1820).
+- Imagens em WebP (qualidade 82–84): mesma aparência, cerca de metade do peso do JPG.
 - Ambiente animado: cada projeto tem a sua cena em `src/components/backdrops/Ambience.jsx`
   (mapa `SCENE`, pelo slug) e o visual em `src/styles/ambience.css`.
 - `theme`: força as cores do fundo em Projetos (`background`, `primary`, `secondary`,

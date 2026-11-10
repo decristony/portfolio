@@ -16,6 +16,14 @@ const FADE = 0.55; // segundos para a camada sumir depois da troca de página
 
 let request = null; // { src, rect, bg, resolve }
 let wake = null;
+// a bolha só some quando a página nova já está pronta (post carregado), para
+// não aparecer um quadro vazio ou claro no meio da troca
+let released = false;
+const MAX_HOLD = 1.2; // segundos: limite de espera pela página
+
+export function releaseGlassReveal() {
+  released = true;
+}
 
 const hexToRgb = (hex) => {
   const v = parseInt(String(hex).replace('#', ''), 16);
@@ -24,6 +32,7 @@ const hexToRgb = (hex) => {
 
 export function playGlassReveal({ src, rect, bg = '#ececec' }) {
   return new Promise((resolve) => {
+    released = false;
     request = { src, rect, bg, resolve };
     wake?.();
   });
@@ -124,6 +133,7 @@ function setup(THREE, canvas) {
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   const material = new THREE.ShaderMaterial({
     transparent: true,
+    premultipliedAlpha: true, // o shader já devolve a cor multiplicada pelo alfa
     uniforms: {
       uTexture: { value: null },
       uProgress: { value: 0 },
@@ -169,6 +179,7 @@ function setup(THREE, canvas) {
         const total = reduced ? 0.01 : DURATION;
         const start = performance.now();
         let covered = false;
+        let fadeFrom = null;
         cancelAnimationFrame(frame);
         const tick = (now) => {
           const t = (now - start) / 1000;
@@ -177,8 +188,11 @@ function setup(THREE, canvas) {
             covered = true;
             job.resolve(); // tela coberta: pode trocar de página
           }
-          if (covered) {
-            material.uniforms.uFade.value = Math.min(1, (t - total - 0.25) / FADE);
+          if (covered && fadeFrom === null && (released || t - total > MAX_HOLD)) {
+            fadeFrom = t + 0.08; // um respiro para a página pintar o primeiro quadro
+          }
+          if (fadeFrom !== null) {
+            material.uniforms.uFade.value = Math.max(0, Math.min(1, (t - fadeFrom) / FADE));
           }
           renderer.render(scene, camera);
           if (material.uniforms.uFade.value < 1) {

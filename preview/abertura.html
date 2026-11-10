@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Abertura — prévia</title>
+<!--
+  Prévia da abertura do portfólio. Abra este arquivo direto no navegador
+  (dois cliques): não precisa rodar o site.
+  Usa exatamente o mesmo roteiro e os mesmos sons do site: ../public/intro/intro.js
+  e intro.css. Mudou lá, muda aqui.
+  Teclas: R repete, Esc pula, L liga/desliga o lo-fi.
+-->
+<link rel="stylesheet" href="../public/intro/intro.css" />
+<style>
+  @font-face { font-family: 'Grotesk'; src: url('../public/fonts/pczyWZYmicHp9LhGgMJo7tnDcHo.woff2') format('woff2'); font-weight: 400; }
+  @font-face { font-family: 'Glyphius'; src: url('../public/fonts/xirQ3g4Sv5q7MG0KvL1PiOOLLBA.woff2') format('woff2'); }
+  html, body { height: 100%; margin: 0; }
+  body {
+    overflow: hidden;
+    background: #ececec;
+    color: #1b1b1b;
+    font-family: 'Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  }
+  .end {
+    position: fixed; inset: 0;
+    display: grid; place-items: center; align-content: center; gap: 14px;
+    font-size: 14px; color: rgba(27, 27, 27, 0.6); text-align: center;
+  }
+  .end__row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .end button {
+    min-height: 44px; padding: 0 20px;
+    border: 1px solid rgba(27, 27, 27, 0.2); border-radius: 999px;
+    background: #f7f6f3; color: #1b1b1b; font: inherit; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="end" id="end">
+    <span>Aqui entra a página Projetos, revelada pela bolha de vidro.<br>O lo-fi continua tocando se você entrou com som.</span>
+    <div class="end__row">
+      <button type="button" id="replay">Repetir abertura (R)</button>
+      <button type="button" id="lofi">Lo-fi ligado (L)</button>
+    </div>
+  </div>
+
+<script src="../public/intro/intro.js"></script>
+<script>
+  const end = document.getElementById('end');
+  const lofiBtn = document.getElementById('lofi');
+  let cancel = null;
+
+  function updateLofi() {
+    lofiBtn.textContent = (OrvionLofi.running ? 'Lo-fi ligado' : 'Lo-fi desligado') + ' (L)';
+  }
+
+  function play() {
+    if (cancel) cancel();
+    OrvionLofi.stop();
+    cancel = OrvionIntro.play({
+      sound: 'ask',
+      revealTarget: '#end', // a tela final faz o papel de Projetos e entra com zoom
+      onDone: () => setTimeout(updateLofi, 50),
+    });
+  }
+
+  function toggleLofi() {
+    if (OrvionLofi.running) OrvionLofi.stop();
+    else {
+      OrvionSound.sfx.on = true;
+      OrvionLofi.start();
+    }
+    updateLofi();
+  }
+
+  document.getElementById('replay').addEventListener('click', play);
+  lofiBtn.addEventListener('click', toggleLofi);
+  addEventListener('keydown', (e) => {
+    if (e.key === 'r' || e.key === 'R') play();
+    if ((e.key === 'l' || e.key === 'L') && !document.querySelector('.oi')) toggleLofi();
+  });
+  play();
+</script>
+</body>
+</html>

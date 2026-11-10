@@ -37,22 +37,6 @@ export function IconClose({ size = 14, ...props }) {
   );
 }
 
-export function IconPlay({ size = 10, ...props }) {
-  return (
-    <svg width={size} height={size * 1.2} viewBox="0 0 10 12" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M0 0v12l10-6z" />
-    </svg>
-  );
-}
-
-export function IconExternal({ size = 11, ...props }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 12 12" fill="none" aria-hidden="true" {...props}>
-      <path d="M3 9 9 3M9 3H4.5M9 3v4.5" stroke="currentColor" strokeWidth="1.1" />
-    </svg>
-  );
-}
-
 export function IconMenu({ size = 12, ...props }) {
   return (
     <svg width={size} height={size} viewBox="0 0 12 12" fill="none" aria-hidden="true" {...props}>

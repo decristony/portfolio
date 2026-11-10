@@ -5,35 +5,35 @@ import { ProjectCover } from '../ProjectCover';
 
 /*
  * Vista "Sanfona": as capas empilhadas uma atrás da outra. A da frente é o
- * projeto em foco; as de trás aparecem em degraus acima dela, menores e
- * desfocadas. Rolar, deslizar, as setas e os botões passam um projeto por vez;
- * a da frente cai para fora e a próxima sobe para o lugar dela.
+ * projeto em foco; as de trás aparecem em degraus acima dela, menores.
+ * Rolar, deslizar, as setas e os botões passam um projeto por vez.
  *
- * A capa da frente tem exatamente o tamanho e o lugar da capa em foco na vista
- * Espacial (ver o CSS de .card-stack), então ela não muda ao trocar de vista.
- * Vinda da Espacial (gather), só as capas de trás se movem: saem de onde
- * flutuavam e se juntam na pilha, todas ao mesmo tempo.
+ * Leve para o celular: só existem na tela as capas da janela [anterior .. 5 atrás].
+ * Imagem só na capa em foco, na de trás e na que acabou de sair; as outras são
+ * "vultos" (um retângulo nas cores do projeto), sem imagem e sem filtro de
+ * desfoque animado. A cada troca a janela anda uma posição e carrega só a
+ * próxima capa de trás.
  *
- * As capas de trás têm todas o mesmo tamanho (pilha organizada); só a da frente
- * assume a proporção real da sua capa, e a troca de tamanho é animada no CSS.
+ * A capa da frente tem o tamanho e o lugar da capa em foco na vista Espacial
+ * (ver o CSS de .card-stack). Vinda da Espacial (gather), as de trás saem de
+ * onde flutuavam e se juntam na pilha.
  */
 const FALLBACK_RATIO = 1616 / 1264;
 const ratios = new Map(); // proporção de cada capa, guardada ao carregar
-const BEHIND = 4; // capas visíveis atrás da da frente
+const BEHIND = 4; // degraus visíveis atrás da da frente
 const STEP_Y = 4.5; // % da altura da capa que cada degrau sobe
 
 const place = (k) => {
-  // saindo: cresce um pouco e se dissolve no lugar (não cai sobre as caixas de baixo)
-  if (k < 0) return { x: 0, rotate: 0, y: '-2%', scale: 1.08, opacity: 0, filter: 'blur(4px)', zIndex: 20 };
-  if (k > BEHIND)
-    return { x: 0, rotate: 0, y: `${-BEHIND * STEP_Y}%`, scale: 1 - BEHIND * 0.07, opacity: 0, filter: 'blur(6px)', zIndex: 0 };
+  // saindo: cresce um pouco e se dissolve no lugar
+  if (k < 0) return { x: 0, rotate: 0, y: '-2%', scale: 1.06, opacity: 0, zIndex: 20 };
+  // logo além da pilha: invisível, pronta para entrar no último degrau
+  if (k > BEHIND) return { x: 0, rotate: 0, y: `${-BEHIND * STEP_Y}%`, scale: 1 - BEHIND * 0.07, opacity: 0, zIndex: 0 };
   return {
     x: 0,
     rotate: 0,
     y: `${-k * STEP_Y}%`,
     scale: 1 - k * 0.07,
-    opacity: k === 0 ? 1 : Math.max(0.22, 0.8 - k * 0.15),
-    filter: k === 0 ? 'blur(0px)' : `blur(${Math.min(4, k * 1)}px)`,
+    opacity: k === 0 ? 1 : k === 1 ? 0.78 : Math.max(0.2, 0.6 - (k - 2) * 0.16),
     zIndex: 20 - k,
   };
 };
@@ -47,11 +47,10 @@ const scattered = (k) => {
     scale: 0.42,
     rotate: Math.sin(angle) * 5,
     opacity: 0.55,
-    filter: 'blur(3px)',
   };
 };
 
-const SPRING = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
+const SPRING = { type: 'spring', stiffness: 140, damping: 24, mass: 0.9 };
 
 export function CardStack({
   projects,
@@ -98,14 +97,17 @@ export function CardStack({
         // distância até o foco, na ordem circular (o anterior fica em -1)
         let k = (index - focus + total) % total;
         if (k === total - 1) k = -1;
+        if (k > BEHIND + 1) return null; // fora da janela: nem existe na página
         const front = k === 0;
+        const withImage = k >= -1 && k <= 1; // foco, a de trás e a que acabou de sair
         // a capa da frente já nasce no lugar: nunca some nem muda ao trocar de vista
         const from = gathering && !front && k > 0 && k <= BEHIND ? scattered(k) : false;
+        const [c0, c1] = project.colors;
         return (
           <motion.button
             type="button"
             key={project.slug}
-            className={`card-stack__card${front ? ' is-front' : ''}`}
+            className={`card-stack__card${front ? ' is-front' : ''}${withImage ? '' : ' is-ghost'}`}
             initial={from}
             animate={place(k)}
             transition={reduced ? { duration: 0 } : SPRING}
@@ -118,12 +120,14 @@ export function CardStack({
             onClick={() => (front ? onOpen?.(index) : onSelect?.(index))}
             onPointerEnter={() => interactive && onHover?.(index)}
           >
-            {project.cover ? (
+            {!withImage ? (
+              <span className="card-stack__ghost" style={{ '--g0': c0, '--g1': c1 }} />
+            ) : project.cover ? (
               <img
                 src={project.cover}
                 alt=""
                 draggable="false"
-                loading={k <= 2 ? 'eager' : 'lazy'}
+                decoding="async"
                 onLoad={(e) => {
                   const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
                   if (w && h && ratios.get(project.cover) !== w / h) {

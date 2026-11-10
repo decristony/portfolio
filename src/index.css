@@ -3108,7 +3108,8 @@ body:has(.home[data-tone='dark']) .nav__right .label {
   transition:
     width 0.7s cubic-bezier(0.22, 1, 0.36, 1),
     height 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
+  contain: layout;
 }
 
 /* a da frente: tamanho e proporção reais da capa (igual ao foco na vista Espacial) */
@@ -3377,36 +3378,24 @@ body:has(.case[data-tone='dark']) .nav__link.is-active {
   }
 }
 
-/* header: voltar para o início, logo depois de "Tony" */
-.nav__home {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  margin-left: 4px;
-  padding: 0 11px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 12px;
-  white-space: nowrap;
-  transition: background-color 0.25s var(--ease), border-color 0.25s var(--ease);
+
+/* Sanfona: as capas fora do foco são vultos leves (sem imagem e sem filtro) */
+.card-stack__card.is-ghost {
+  background: transparent;
+  box-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.45);
 }
 
-.nav__home:hover {
-  background: rgba(255, 255, 255, 0.35);
+.card-stack__ghost {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--g0), var(--g1));
+  opacity: 0.55;
 }
 
-body:has(.home[data-tone='dark']) .nav__home,
-body:has(.case[data-tone='dark']) .nav__home {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-body:has(.home[data-tone='dark']) .nav__home:hover,
-body:has(.case[data-tone='dark']) .nav__home:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.nav__home:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+/* no celular a troca de tamanho da capa da frente fica mais curta */
+@media (max-width: 767px) {
+  .card-stack__card {
+    transition-duration: 0.45s;
+  }
 }

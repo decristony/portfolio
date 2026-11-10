@@ -3399,3 +3399,15 @@ body:has(.case[data-tone='dark']) .nav__link.is-active {
     transition-duration: 0.45s;
   }
 }
+
+/* vista Espacial: o toque fica com o túnel (sem rolagem nem zoom do navegador
+   cancelando o toque); cursor: pointer faz o iOS entregar o "click" */
+.work-stage__canvas {
+  touch-action: none;
+}
+
+@media (hover: none) {
+  .work-stage__canvas {
+    cursor: pointer;
+  }
+}

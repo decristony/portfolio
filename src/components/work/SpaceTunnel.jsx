@@ -463,13 +463,30 @@ export default function SpaceTunnel({
     const onPointerDown = (e) => {
       down = { x: e.clientX, y: e.clientY };
     };
-    const onPointerUp = (e) => {
-      // arraste não conta como clique
-      if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 10) return;
-      onPointerMove(e);
-      pointerRef.current.inside = true; // toque também escolhe projeto
-      pointerRef.current.touch = e.pointerType !== 'mouse';
+    // escolhe o projeto que está no ponto (x, y) da tela
+    const pick = (x, y, touch) => {
+      const box = node.getBoundingClientRect();
+      pointerRef.current.x = ((x - box.left) / box.width) * 2 - 1;
+      pointerRef.current.y = -((y - box.top) / box.height) * 2 + 1;
+      pointerRef.current.inside = true;
+      pointerRef.current.touch = touch;
       pointerRef.current.clicked = true;
+    };
+    // mouse: o clique vale no pointerup (arraste não conta)
+    const onPointerUp = (e) => {
+      if (e.pointerType !== 'mouse') return;
+      if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 10) return;
+      pick(e.clientX, e.clientY, false);
+    };
+    // toque: o celular às vezes troca o pointerup por pointercancel; o "click"
+    // do fim de um toque chega sempre (e não chega depois de um deslize)
+    const onClick = (e) => {
+      if (lastType === 'mouse') return;
+      pick(e.clientX, e.clientY, true);
+    };
+    let lastType = 'mouse';
+    const onType = (e) => {
+      lastType = e.pointerType;
     };
     const onPointerLeave = () => {
       pointerRef.current.inside = false;
@@ -479,12 +496,16 @@ export default function SpaceTunnel({
     node.addEventListener('pointerleave', onPointerLeave);
     node.addEventListener('pointerdown', onPointerDown);
     node.addEventListener('pointerup', onPointerUp);
+    node.addEventListener('pointerdown', onType);
+    node.addEventListener('click', onClick);
     return () => {
       unbind();
       node.removeEventListener('pointermove', onPointerMove);
       node.removeEventListener('pointerleave', onPointerLeave);
       node.removeEventListener('pointerdown', onPointerDown);
       node.removeEventListener('pointerup', onPointerUp);
+      node.removeEventListener('pointerdown', onType);
+      node.removeEventListener('click', onClick);
       if (controlsRef) controlsRef.current = null;
     };
   }, [controlsRef, active]);

@@ -248,13 +248,19 @@ export function Project() {
         </nav>
       </aside>
 
-      {/* fim do post: segue direto para o próximo projeto */}
-      <Link className="case__next" to={`/project/${next.slug}`} onMouseEnter={playHover} onClick={playClick}>
-        <span className="case__next-label">Próximo projeto</span>
-        <strong className="case__next-title">{next.title}</strong>
-        <span className="case__next-cat">{next.category}</span>
-        <IconArrowRight size={22} className="case__next-arrow" />
-      </Link>
+      {/* fim do post: segue para o próximo projeto (e volta para o anterior) */}
+      <nav className="case__end" aria-label="Outros projetos">
+        <Link className="case__next" to={`/project/${next.slug}`} onMouseEnter={playHover} onClick={playClick}>
+          <span className="case__next-label">Próximo projeto</span>
+          <strong className="case__next-title">{next.title}</strong>
+          <span className="case__next-cat">{next.category}</span>
+          <IconArrowRight size={22} className="case__next-arrow" />
+        </Link>
+        <Link className="case__prev" to={`/project/${previous.slug}`} onMouseEnter={playHover} onClick={playClick}>
+          <IconArrowLeft size={12} />
+          <span>Projeto anterior: {capitalize(previous.title)}</span>
+        </Link>
+      </nav>
     </main>
   );
 }

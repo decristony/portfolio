@@ -3401,7 +3401,8 @@ body:has(.home[data-tone='dark']) .nav__right .label {
 }
 
 /* menu e cabeçalho seguem o tom do fundo do projeto, como as caixas de baixo */
-body:has(.home[data-tone='dark']) .nav__menu {
+body:has(.home[data-tone='dark']) .nav__menu,
+body:has(.case[data-tone='dark']) .nav__menu {
   background: rgba(18, 16, 20, 0.5);
   border-color: rgba(255, 255, 255, 0.14);
   color: #f4f2ed;
@@ -3417,10 +3418,48 @@ body:has(.home[data-tone='dark']) .nav__menu {
   }
 }
 
-body:has(.home[data-tone='dark']) .nav__link:hover {
+body:has(.home[data-tone='dark']) .nav__link:hover,
+body:has(.case[data-tone='dark']) .nav__link:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-body:has(.home[data-tone='dark']) .nav__link.is-active {
+body:has(.home[data-tone='dark']) .nav__link.is-active,
+body:has(.case[data-tone='dark']) .nav__link.is-active {
   background: rgba(255, 255, 255, 0.16);
+}
+
+/* fim do post: "Próximo projeto" grande e o anterior discreto logo abaixo */
+.case__end {
+  position: relative;
+  z-index: 1;
+}
+
+.case__prev {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 4px;
+  font-size: 13px;
+  opacity: 0.7;
+  transition: opacity 0.25s var(--ease);
+}
+
+.case__prev:hover,
+.case__prev:focus-visible {
+  opacity: 1;
+}
+
+.case__prev:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* celular e tablet: o par anterior/próximo da ficha sai; fica só o bloco do fim */
+@media (max-width: 1099px) {
+  .case__pager {
+    display: none;
+  }
 }

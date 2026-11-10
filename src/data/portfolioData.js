@@ -275,7 +275,7 @@ export const portfolioData = {
     bio: [
       'Meu trabalho une estética, performance e usabilidade. Cuido do site do primeiro esboço ao código publicado, com foco em carregamento rápido e SEO.',
       'Pela OrvionWeb, desenho sites para clínicas e profissionais de saúde, cada um com identidade própria: paleta, tipografia e uma interação que nasce da especialidade.',
-      'Também dou aulas de Photoshop e uso IA e automação para que o site trabalhe pelo negócio do cliente, não só pela aparência.',
+      'Uso IA e automação para que o site trabalhe pelo negócio do cliente, não só pela aparência.',
     ],
     services: [
       'Criação de websites profissionais',
@@ -288,7 +288,6 @@ export const portfolioData = {
     experience: [
       { period: '2026 — atual', role: 'Direção de arte e web design', company: 'OrvionWeb' },
       { period: '2019 — atual', role: 'Web designer e desenvolvedor', company: 'Independente' },
-      { period: 'Cursos', role: 'Instrutor de Photoshop', company: 'Edição, design e manipulação' },
     ],
     // Ferramentas no lugar de prêmios (a página Sobre mostra esta lista).
     recognition: [

@@ -66,12 +66,12 @@ export function About() {
 
       <div className="about-cta">
         <p className="about-cta__text">
-          Have something
+          Tem um projeto
           <br />
-          in mind?
+          em mente?
         </p>
         <Link to="/contact" className="pill">
-          Start a project <IconArrowUpRight size={12} />
+          Começar um projeto <IconArrowUpRight size={12} />
         </Link>
       </div>
     </main>

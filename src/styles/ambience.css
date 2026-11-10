@@ -1,0 +1,666 @@
+/* ==========================================================================
+   Ambientes por projeto (components/backdrops/Ambience.jsx)
+   Cada projeto tem uma cena viva que nasce da capa. Cores: --a1..--a4 vêm da
+   paleta do projeto; --ink é a cor das linhas conforme o fundo (claro/escuro).
+   ========================================================================== */
+
+@property --lx {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 30%;
+}
+
+@property --ly {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+
+@property --breath {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.85;
+}
+
+.amb {
+  --ink: rgba(24, 20, 18, 0.42);
+  --ink-soft: rgba(24, 20, 18, 0.12);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.amb[data-tone='dark'] {
+  --ink: rgba(255, 255, 255, 0.42);
+  --ink-soft: rgba(255, 255, 255, 0.1);
+}
+
+/* página do projeto: presa à tela, atrás do post */
+.amb--fixed {
+  position: fixed;
+  z-index: 0;
+}
+
+.amb-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.amb-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+}
+
+/* linha que se desenha sozinha (pathLength="1") */
+.amb-draw {
+  stroke-width: 1.2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+  animation: amb-draw 5s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+}
+
+.amb-draw--late {
+  animation-delay: 1.4s;
+  opacity: 0.6;
+}
+
+.amb-draw--slow {
+  animation-duration: 8s;
+}
+
+@keyframes amb-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- Tez: "pele" em contorno; uma lente de luz preenche as letras -------- */
+.amb--skin {
+  animation: amb-lens 22s ease-in-out infinite alternate;
+}
+
+.amb-skin__word {
+  position: absolute;
+  top: 54%;
+  left: 52%;
+  translate: -50% -50%;
+  font: italic 400 clamp(220px, 36vw, 680px) / 0.8 'Cormorant Garamond', 'Cormorant', Georgia, serif;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.amb-skin__word--outline {
+  color: transparent;
+  -webkit-text-stroke: 1.2px color-mix(in srgb, var(--a1) 55%, transparent);
+}
+
+.amb-skin__word--fill {
+  color: color-mix(in srgb, var(--a1) 30%, transparent);
+  mask-image: radial-gradient(circle 16vw at var(--lx) var(--ly), #000 25%, transparent 72%);
+}
+
+.amb--skin .amb-lines {
+  stroke: color-mix(in srgb, var(--a1) 60%, transparent);
+}
+
+@keyframes amb-lens {
+  0% { --lx: 18%; --ly: 38%; }
+  30% { --lx: 62%; --ly: 28%; }
+  65% { --lx: 48%; --ly: 76%; }
+  100% { --lx: 86%; --ly: 52%; }
+}
+
+/* --- Nervura: ramos de nervo com sinais correndo ------------------------- */
+.amb-synapse__nerve {
+  stroke: color-mix(in srgb, var(--a3) 70%, transparent);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.amb-synapse__signal {
+  stroke: var(--a1);
+  stroke-width: 2.6;
+  stroke-dasharray: 0.07 0.93;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 5px var(--a1));
+  animation: amb-signal 3.4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+@keyframes amb-signal {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- Ciranda: a linha do crescimento se desenha e um aviãozinho voa ------- */
+.amb--growth .amb-lines {
+  stroke: color-mix(in srgb, #1d3358 55%, transparent);
+}
+
+.amb--growth .amb-draw {
+  stroke-width: 2;
+}
+
+/* marcos: haste que sobe da linha e o nome escrito à mão, um depois do outro
+   (no ritmo em que a linha passa por eles) */
+.amb-growth__mark {
+  position: absolute;
+  width: 1px;
+  height: 64px;
+  translate: 0 -100%;
+  background: linear-gradient(to top, var(--a2), transparent);
+  transform-origin: bottom;
+  opacity: 0;
+  animation: amb-mark 0.9s ease-out forwards;
+  animation-delay: calc(1.2s + var(--i) * 1.6s);
+}
+
+.amb-growth__mark::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--a2);
+}
+
+.amb-growth__mark em {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  translate: -50% -6px;
+  rotate: -8deg;
+  color: color-mix(in srgb, #1d3358 70%, transparent);
+  font: italic 400 clamp(17px, 1.6vw, 26px) / 1 'Segoe Script', 'Bradley Hand', 'Comic Sans MS', cursive;
+  white-space: nowrap;
+}
+
+@keyframes amb-mark {
+  from { opacity: 0; scale: 1 0.3; }
+  to { opacity: 1; scale: 1 1; }
+}
+
+.amb-growth__plane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--a2);
+  animation: amb-plane 16s ease-in-out infinite;
+}
+
+@keyframes amb-plane {
+  0% { translate: -6vw 76vh; rotate: -12deg; opacity: 0; }
+  8% { opacity: 1; }
+  30% { translate: 30vw 63vh; rotate: -8deg; }
+  55% { translate: 55vw 50vh; rotate: -18deg; }
+  80% { translate: 82vw 31vh; rotate: -24deg; }
+  92% { opacity: 1; }
+  100% { translate: 104vw 12vh; rotate: -28deg; opacity: 0; }
+}
+
+.amb-growth__spark {
+  position: absolute;
+  top: calc(18% + sin(calc(var(--i) * 97deg)) * 14% + 20%);
+  left: calc(12% + var(--i) * 15%);
+  width: 24px;
+  height: 24px;
+  background:
+    linear-gradient(var(--a2), var(--a2)) center / 2px 100% no-repeat,
+    linear-gradient(var(--a2), var(--a2)) center / 100% 2px no-repeat;
+  rotate: 45deg;
+  opacity: 0;
+  animation: amb-twinkle 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.75s);
+}
+
+@keyframes amb-twinkle {
+  0%, 100% { opacity: 0; scale: 0.4; }
+  45% { opacity: 0.8; scale: 1; }
+}
+
+/* --- Clareira: névoa que passa e um círculo que respira ------------------ */
+.amb-breath__mist {
+  position: absolute;
+  width: 90vw;
+  height: 60vh;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--a3) 55%, transparent), transparent);
+  filter: blur(30px);
+  opacity: 0.55;
+}
+
+.amb-breath__mist--a {
+  top: 10%;
+  left: -30%;
+  animation: amb-mist 34s ease-in-out infinite alternate;
+}
+
+.amb-breath__mist--b {
+  bottom: -10%;
+  right: -30%;
+  animation: amb-mist 41s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes amb-mist {
+  to {
+    translate: 40vw -6vh;
+  }
+}
+
+/* inspira 4 s, expira 6 s */
+.amb--breath {
+  animation: amb-breathe 10s ease-in-out infinite;
+}
+
+@keyframes amb-breathe {
+  0%, 100% { --breath: 0.82; }
+  40% { --breath: 1.1; }
+}
+
+.amb-breath__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46vmin;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  scale: var(--breath);
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--a3) 22%, transparent), transparent);
+}
+
+.amb-breath__ring--2 {
+  width: 68vmin;
+  scale: calc(2 - var(--breath));
+  border-color: var(--ink-soft);
+  background: none;
+}
+
+.amb-breath__word {
+  position: absolute;
+  bottom: -6vh;
+  left: 50%;
+  translate: -50% 0;
+  color: transparent;
+  font: italic 400 clamp(160px, 26vw, 460px) / 1 'Gilda Display', Georgia, serif;
+  -webkit-text-stroke: 1px var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* --- Passada: raias, rastros de velocidade e "FÔLEGO" passando ----------- */
+.amb-speed__lanes {
+  position: absolute;
+  inset: -20%;
+  background: repeating-linear-gradient(100deg, transparent 0 118px, var(--ink-soft) 118px 120px);
+  mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
+  animation: amb-lanes 2.6s linear infinite;
+}
+
+@keyframes amb-lanes {
+  to {
+    translate: -121.5px 0;
+  }
+}
+
+.amb-speed__streak {
+  position: absolute;
+  top: calc(12% + var(--i) * 12%);
+  left: 0;
+  width: calc(18vw + var(--i) * 3vw);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--a1), transparent);
+  rotate: -8deg;
+  opacity: 0.75;
+  animation: amb-streak calc(1.6s + var(--i) * 0.35s) cubic-bezier(0.6, 0, 0.3, 1) infinite;
+  animation-delay: calc(var(--i) * -0.7s);
+}
+
+@keyframes amb-streak {
+  from { translate: -40vw 0; }
+  to { translate: 140vw 0; }
+}
+
+.amb-speed__word {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: flex;
+  translate: 0 -50%;
+  color: transparent;
+  font: 900 34vh / 0.85 'Big Shoulders Display', 'Oswald', 'Arial Narrow', Impact, sans-serif;
+  -webkit-text-stroke: 1.2px var(--ink-soft);
+  white-space: nowrap;
+  animation: amb-marquee 48s linear infinite;
+}
+
+@keyframes amb-marquee {
+  to {
+    translate: -50% -50%;
+  }
+}
+
+/* --- Íris: uma íris com fibras girando, entrando e saindo de foco ------- */
+.amb-focus {
+  position: absolute;
+  inset: 0;
+  animation: amb-focus 9s ease-in-out infinite;
+}
+
+@keyframes amb-focus {
+  0%, 100% { filter: blur(12px); }
+  40%, 70% { filter: blur(0); }
+}
+
+.amb-focus__iris {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(110vmin, 1100px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--a3) 70%, transparent) 0 0.8deg, transparent 0.8deg 3.2deg),
+    radial-gradient(circle, color-mix(in srgb, var(--a2) 40%, transparent) 20%, color-mix(in srgb, var(--a3) 25%, transparent) 46%, transparent 50%);
+  mask-image: radial-gradient(circle, transparent 0 17%, #000 19% 46%, transparent 50%);
+  opacity: 0.35;
+  animation: amb-spin 120s linear infinite;
+}
+
+.amb-focus__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(55vmin, 560px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  animation: amb-dilate 9s ease-in-out infinite;
+}
+
+.amb-focus__ring--2 {
+  width: min(122vmin, 1220px);
+  border-color: var(--ink-soft);
+  animation-direction: reverse;
+}
+
+@keyframes amb-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+@keyframes amb-dilate {
+  0%, 100% { scale: 0.92; }
+  50% { scale: 1.04; }
+}
+
+.amb-focus__chart {
+  position: absolute;
+  right: 4vw;
+  bottom: 6vh;
+  color: var(--ink-soft);
+  font: 400 clamp(28px, 4vw, 60px) / 1 'Fraunces', Georgia, serif;
+  letter-spacing: 0.4em;
+}
+
+/* --- Marfim: pedra polida com veios e uma luz que passa clareando ------- */
+.amb-marble__stone {
+  position: absolute;
+  inset: -12%;
+  /* uma única chapa grande (sem repetição, sem emendas) que desliza devagar */
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'%3E%3Cfilter id='m' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0022 .007' numOctaves='5' seed='8'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -3.2 1.35'/%3E%3C/filter%3E%3Crect width='1600' height='1000' filter='url(%23m)'/%3E%3C/svg%3E") center / cover no-repeat;
+  opacity: 0.16;
+  mix-blend-mode: soft-light;
+  animation: amb-drift 60s ease-in-out infinite alternate;
+}
+
+.amb[data-tone='light'] .amb-marble__stone {
+  mix-blend-mode: multiply;
+  filter: invert(1);
+  opacity: 0.12;
+}
+
+@keyframes amb-drift {
+  from { translate: -3% -2%; scale: 1; }
+  to { translate: 3% 2%; scale: 1.06; }
+}
+
+.amb-marble__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 38%, rgba(255, 255, 255, 0.14) 48%, rgba(255, 255, 255, 0.04) 54%, transparent 62%);
+  background-size: 260% 100%;
+  animation: amb-sheen 9s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+
+@keyframes amb-sheen {
+  0% { background-position: 120% 0; }
+  60%, 100% { background-position: -40% 0; }
+}
+
+/* --- Faro: nomes dos pets flutuando e patinhas atravessando ------------- */
+.amb-paws__names span {
+  position: absolute;
+  top: calc(50% + sin(calc(var(--i) * 137.5deg)) * 42%);
+  left: calc(50% + cos(calc(var(--i) * 137.5deg)) * 44%);
+  translate: -50% -50%;
+  color: var(--ink-soft);
+  font: italic 400 clamp(26px, 3.2vw, 54px) / 1 'Segoe Script', 'Brush Script MT', 'Snell Roundhand', cursive;
+  white-space: nowrap;
+  animation: amb-float 12s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -1.3s);
+}
+
+@keyframes amb-float {
+  from { translate: -50% -40%; }
+  to { translate: -50% -62%; }
+}
+
+.amb-paws__print {
+  position: absolute;
+  top: calc(88% - var(--i) * 8.5%);
+  left: calc(6% + var(--i) * 9% + (var(--i) - 2 * round(down, var(--i) / 2)) * 3%);
+  fill: var(--a2);
+  rotate: 50deg;
+  opacity: 0;
+  animation: amb-step 9s ease-out infinite;
+  animation-delay: calc(var(--i) * 0.45s);
+}
+
+@keyframes amb-step {
+  0% { opacity: 0; scale: 0.6; }
+  4% { opacity: 0.55; scale: 1; }
+  45% { opacity: 0.35; }
+  65%, 100% { opacity: 0; }
+}
+
+.amb-paws__light {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle 22vw at var(--lx) var(--ly), color-mix(in srgb, var(--a4) 12%, transparent), transparent 70%);
+  mix-blend-mode: screen;
+  animation: amb-lens 20s ease-in-out infinite alternate;
+}
+
+/* --- Raiz: raízes crescendo do chão e "MOVA-SE SEM DOR" passando --------- */
+.amb-roots__root {
+  stroke: color-mix(in srgb, var(--a2) 75%, transparent);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+  animation: amb-draw 2.4s cubic-bezier(0.3, 0, 0.2, 1) forwards;
+}
+
+.amb-roots__word {
+  position: absolute;
+  top: 16%;
+  left: 0;
+  display: flex;
+  color: transparent;
+  font: 800 clamp(70px, 11vw, 190px) / 1 'Archivo Expanded', 'Archivo Black', 'Arial Black', sans-serif;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1.2px color-mix(in srgb, var(--a1) 45%, transparent);
+  white-space: nowrap;
+  animation: amb-marquee-x 60s linear infinite;
+}
+
+@keyframes amb-marquee-x {
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* --- Colo: "espera" respirando e flocos de algodão subindo --------------- */
+.amb-cotton__word {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  translate: -50% -50%;
+  color: color-mix(in srgb, var(--a3) 14%, transparent);
+  font: italic 400 clamp(200px, 30vw, 560px) / 0.9 'DM Serif Display', Georgia, serif;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  animation: amb-wait 12s ease-in-out infinite;
+}
+
+@keyframes amb-wait {
+  0%, 100% { scale: 1; opacity: 0.7; }
+  50% { scale: 1.04; opacity: 1; }
+}
+
+.amb-cotton__fleck {
+  position: absolute;
+  bottom: -40px;
+  left: calc(50% + sin(calc(var(--i) * 151deg)) * 48%);
+  width: calc(10px + (var(--i) - 3 * round(down, var(--i) / 3)) * 9px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 248, 238, 0.85), rgba(255, 248, 238, 0) 70%);
+  filter: blur(1px);
+  animation: amb-rise calc(16s + var(--i) * 1.4s) linear infinite;
+  animation-delay: calc(var(--i) * -2.3s);
+}
+
+@keyframes amb-rise {
+  0% { translate: 0 0; opacity: 0; }
+  10% { opacity: 0.8; }
+  50% { translate: 4vw -55vh; }
+  90% { opacity: 0.6; }
+  100% { translate: -3vw -115vh; opacity: 0; }
+}
+
+/* --- Meridiano: canais de energia com pontos acendendo ------------------- */
+.amb-meridian__channel {
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.amb-meridian__flow {
+  stroke: var(--a1);
+  stroke-width: 2;
+  stroke-dasharray: 0.12 0.88;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 6px var(--a1));
+  animation: amb-signal 6s linear infinite;
+}
+
+.amb-meridian__point {
+  fill: var(--a3);
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: amb-point 4.5s ease-in-out infinite;
+}
+
+@keyframes amb-point {
+  0%, 100% { opacity: 0.25; scale: 0.8; }
+  20% { opacity: 1; scale: 1.6; filter: drop-shadow(0 0 8px var(--a1)); }
+}
+
+/* --- Timbre: ondas sonoras, círculos de som e "ouvir" -------------------- */
+.amb-sound {
+  width: 200%;
+  animation: amb-marquee-x 22s linear infinite;
+}
+
+.amb-sound__wave {
+  stroke: color-mix(in srgb, var(--a1) 80%, var(--ink));
+  stroke-width: 1.3;
+  vector-effect: non-scaling-stroke;
+}
+
+.amb-sound__ripples i {
+  position: absolute;
+  top: 46%;
+  left: 70%;
+  width: 22vmin;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 1px solid color-mix(in srgb, var(--a2) 70%, transparent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: amb-ripple 6s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  animation-delay: calc(var(--i) * 1.5s);
+}
+
+@keyframes amb-ripple {
+  0% { scale: 0.3; opacity: 0.8; }
+  100% { scale: 4.2; opacity: 0; }
+}
+
+.amb-sound__word {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  translate: -50% 0;
+  color: transparent;
+  font: 700 clamp(180px, 28vw, 520px) / 1 'Anybody', 'Inter Tight', 'Arial Black', sans-serif;
+  letter-spacing: -0.04em;
+  -webkit-text-stroke: 1.2px var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* --- Sereno: veludo preto atrás das estrelas ----------------------------- */
+.amb-stars {
+  background:
+    radial-gradient(70% 55% at 30% 18%, rgba(120, 135, 140, 0.07), transparent 70%),
+    radial-gradient(60% 50% at 78% 85%, rgba(95, 105, 112, 0.06), transparent 70%),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.45) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* movimento reduzido: cenas paradas, linhas já desenhadas */
+@media (prefers-reduced-motion: reduce) {
+  .amb,
+  .amb * {
+    animation: none !important;
+  }
+  .amb .amb-draw,
+  .amb .amb-roots__root {
+    stroke-dashoffset: 0;
+  }
+  .amb-growth__plane,
+  .amb-paws__print {
+    opacity: 0;
+  }
+}

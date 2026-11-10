@@ -55,110 +55,6 @@
   100% { transform: translate(2%, -3%); }
 }
 
-/* ---------- portão: entrar com ou sem som ---------- */
-.oi-gate {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  justify-items: center;
-  gap: 22px;
-  text-align: center;
-  transition: opacity 0.45s var(--oi-ease), transform 0.45s var(--oi-ease);
-}
-
-.oi-gate.is-out {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-.oi-gate__mark {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 1px solid rgba(244, 242, 237, 0.22);
-  border-radius: 14px;
-  font-family: var(--oi-display);
-  font-size: 24px;
-  letter-spacing: -0.02em;
-}
-
-.oi-gate__hint {
-  margin: 0;
-  max-width: 30ch;
-  color: rgba(244, 242, 237, 0.62);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.oi-gate__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-
-.oi-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 0 20px;
-  border: 1px solid rgba(244, 242, 237, 0.28);
-  border-radius: 999px;
-  background: rgba(244, 242, 237, 0.08);
-  color: var(--oi-paper);
-  font: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.25s ease;
-}
-
-.oi-btn--ghost {
-  border-color: transparent;
-  background: transparent;
-  color: rgba(244, 242, 237, 0.62);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .oi-btn:hover {
-    background: rgba(244, 242, 237, 0.16);
-  }
-  .oi-btn--ghost:hover {
-    color: var(--oi-paper);
-    background: transparent;
-  }
-}
-
-.oi-btn:focus-visible {
-  outline: 2px solid var(--oi-paper);
-  outline-offset: 3px;
-}
-
-.oi-wave {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  height: 12px;
-}
-
-.oi-wave i {
-  width: 2px;
-  height: 100%;
-  border-radius: 1px;
-  background: currentColor;
-  animation: oi-wave 1s ease-in-out infinite;
-}
-
-.oi-wave i:nth-child(2) { animation-delay: -0.2s; }
-.oi-wave i:nth-child(3) { animation-delay: -0.4s; }
-.oi-wave i:nth-child(4) { animation-delay: -0.6s; }
-
-@keyframes oi-wave {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
-}
-
 /* ---------- digitação ---------- */
 .oi-hello {
   position: absolute;
@@ -321,7 +217,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .oi-grain,
-  .oi-wave i,
   .oi-zoom-in {
     animation: none;
   }

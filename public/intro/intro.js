@@ -7,7 +7,7 @@
  *   window.OrvionSound.resume()          -> libera o áudio num gesto do usuário
  *
  * Roteiro, numa página só (a barrinha de digitação conduz tudo):
- *  0. Portão: "Entrar com som" / "Entrar sem som" (o navegador só toca som depois de um clique).
+ *  0. Começa direto, com som (se o navegador bloquear, o som entra no primeiro gesto).
  *  1. As saudações são digitadas: devagar no começo e cada vez mais rápido,
  *     até "Boas-vindas".
  *  2. No mesmo lugar, "Olá mundo" e "Hello world" são digitados juntos.
@@ -270,7 +270,7 @@
       {
         root: document.body,
         revealTarget: '#root', // o que dá o zoom de entrada por trás da bolha
-        sound: 'ask', // 'ask' mostra o portão; true/false entra direto
+        sound: true, // com som por padrão
         reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
         onSound: function () {},
         onDone: function () {},
@@ -299,16 +299,6 @@
     el.innerHTML = `
       <div class="oi-stage">
         <div class="oi-grain"></div>
-        <div class="oi-gate">
-          <span class="oi-gate__mark" aria-hidden="true">TD</span>
-          <p class="oi-gate__hint">Uma abertura curta, feita para ouvir. Melhor com fones.</p>
-          <div class="oi-gate__actions">
-            <button type="button" class="oi-btn" data-sound="on">
-              <span class="oi-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Entrar com som
-            </button>
-            <button type="button" class="oi-btn oi-btn--ghost" data-sound="off">Entrar sem som</button>
-          </div>
-        </div>
         <p class="oi-hello" aria-hidden="true" hidden><span></span></p>
         <div class="oi-type" aria-hidden="true" hidden><p></p><p></p></div>
       </div>
@@ -317,7 +307,6 @@
     o.root.appendChild(el);
 
     const stage = el.querySelector('.oi-stage');
-    const gate = el.querySelector('.oi-gate');
     const hello = el.querySelector('.oi-hello');
     const helloText = hello.querySelector('span');
     const type = el.querySelector('.oi-type');
@@ -394,6 +383,7 @@
         () => {
           cancelAnimationFrame(frame);
           window.removeEventListener('keydown', onKey);
+          unlockEvents.forEach((ev) => window.removeEventListener(ev, unlock));
           const target = o.revealTarget ? document.querySelector(o.revealTarget) : null;
           if (target) target.classList.remove('oi-zoom-in');
           el.remove();
@@ -411,9 +401,7 @@
 
     /* ---------- roteiro ---------- */
     async function story() {
-      gate.classList.add('is-out');
-      await wait(420);
-      gate.hidden = true;
+      await wait(450); // um respiro na página escura antes da primeira letra
       skip.hidden = false;
 
       // 1. saudações: devagar no começo, cada vez mais rápido
@@ -458,9 +446,16 @@
       finish(false);
     }
 
+    // o navegador só libera o áudio depois de um gesto: se ele bloquear, o som
+    // entra no primeiro clique, toque ou tecla, no meio da abertura mesmo
+    const unlock = () => resume();
+    const unlockEvents = ['pointerdown', 'touchstart', 'keydown'];
     function begin(withSound) {
       sfx.on = Boolean(withSound);
-      if (sfx.on) resume();
+      if (sfx.on) {
+        resume();
+        unlockEvents.forEach((ev) => window.addEventListener(ev, unlock, { passive: true }));
+      }
       o.onSound(sfx.on);
       if (o.reduced) {
         finish(true); // movimento reduzido: sem roteiro, só some
@@ -469,17 +464,7 @@
       story().catch(() => {});
     }
 
-    if (o.sound === 'ask') {
-      gate.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-sound]');
-        if (btn) begin(btn.getAttribute('data-sound') === 'on');
-      });
-      const first = gate.querySelector('[data-sound="on"]');
-      setTimeout(() => first && first.focus({ preventScroll: true }), 50);
-    } else {
-      gate.hidden = true;
-      begin(o.sound);
-    }
+    begin(o.sound);
 
     return () => finish(true);
   }

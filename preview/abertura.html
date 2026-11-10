@@ -58,7 +58,7 @@
     if (cancel) cancel();
     OrvionLofi.stop();
     cancel = OrvionIntro.play({
-      sound: 'ask',
+      sound: true,
       revealTarget: '#end', // a tela final faz o papel de Projetos e entra com zoom
       onDone: () => setTimeout(updateLofi, 50),
     });

@@ -23,7 +23,8 @@ const BEHIND = 4; // capas visíveis atrás da da frente
 const STEP_Y = 4.5; // % da altura da capa que cada degrau sobe
 
 const place = (k) => {
-  if (k < 0) return { x: 0, rotate: 0, y: '60%', scale: 1.03, opacity: 0, filter: 'blur(6px)', zIndex: 20 }; // saindo
+  // saindo: cresce um pouco e se dissolve no lugar (não cai sobre as caixas de baixo)
+  if (k < 0) return { x: 0, rotate: 0, y: '-2%', scale: 1.08, opacity: 0, filter: 'blur(4px)', zIndex: 20 };
   if (k > BEHIND)
     return { x: 0, rotate: 0, y: `${-BEHIND * STEP_Y}%`, scale: 1 - BEHIND * 0.07, opacity: 0, filter: 'blur(6px)', zIndex: 0 };
   return {

@@ -126,20 +126,23 @@ export function Work() {
     else setFocus((f) => (f + dir + total) % total);
   };
 
-  const step = (dir) => {
+  const step = (dir) => move(dir);
+
+  // som de clique a cada troca de projeto, venha de onde vier: setas, rolagem,
+  // deslize, teclado ou clique numa capa de trás
+  const lastFocus = useRef(focus);
+  useEffect(() => {
+    if (lastFocus.current === focus) return;
+    lastFocus.current = focus;
     playClick();
-    move(dir);
-  };
+  }, [focus, playClick]);
 
   const stack = (
     <CardStack
       projects={projects}
       focus={focus}
       onStep={move}
-      onSelect={(index) => {
-        playClick();
-        setFocus(index);
-      }}
+      onSelect={setFocus}
       onOpen={openProject}
       onHover={setHovered}
       gather={switched}
@@ -192,7 +195,8 @@ export function Work() {
         createPortal(
           <aside
             className={`work-info glass${compact ? ' work-info--compact' : ''}`}
-            key={info.slug}
+            // no celular a caixa fica parada e só o texto troca; no desktop ela abre a cada hover
+            key={compact ? 'compact' : info.slug}
             data-tone={theme.isDark ? 'dark' : 'light'}
             aria-live="polite"
           >
@@ -204,7 +208,9 @@ export function Work() {
                   : 'Clique para trazer ao centro'}
             </span>
             <h2 className="work-info__title">{info.title}</h2>
-            <p className="work-info__for">{madeFor(info)}</p>
+            <p className="work-info__for work-info__swap" key={info.slug}>
+              {madeFor(info)}
+            </p>
 
             <dl className="work-info__rows">
               <div>

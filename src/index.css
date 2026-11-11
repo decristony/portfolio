@@ -2538,17 +2538,30 @@ h1,
   }
 }
 
-/* A linha de status segue o tom do projeto (texto claro em fundo escuro) */
-body:has(.home[data-tone='dark']) .nav__right {
-  color: #f4f2ed;
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(0, 0, 0, 0.16);
+/* A linha de status (som, hora, e-mail) segue o tom do projeto, como o menu da
+   esquerda: texto claro em fundo escuro, na home e na página do projeto */
+.nav__right {
+  transition: background-color 0.6s var(--ease), color 0.6s var(--ease), border-color 0.6s var(--ease);
 }
-body:has(.home[data-tone='dark']) .nav__right > * + * {
+body:has(.home[data-tone='dark']) .nav__right,
+body:has(.case[data-tone='dark']) .nav__right {
+  color: #f4f2ed;
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(18, 16, 20, 0.5);
+}
+body:has(.home[data-tone='dark']) .nav__right > * + *,
+body:has(.case[data-tone='dark']) .nav__right > * + * {
   border-left-color: rgba(255, 255, 255, 0.2);
 }
-body:has(.home[data-tone='dark']) .nav__right .label {
+/* o botão de som tinha cor própria (escura) e não acompanhava a caixa */
+body:has(.home[data-tone='dark']) .nav__right .audio,
+body:has(.case[data-tone='dark']) .nav__right .audio,
+body:has(.home[data-tone='dark']) .nav__right .label,
+body:has(.case[data-tone='dark']) .nav__right .label {
   color: inherit;
+}
+.nav__right .audio {
+  transition: color 0.6s var(--ease);
 }
 
 /* ---------------------------------------------------------------------------
@@ -3502,6 +3515,8 @@ body:has(.case[data-tone='dark']) .nav__link.is-active {
 :root[data-perf='baixo'] .home[data-tone='dark'] .work-view,
 :root[data-perf='baixo'] body:has(.home[data-tone='dark']) .nav__menu,
 :root[data-perf='baixo'] body:has(.case[data-tone='dark']) .nav__menu,
+:root[data-perf='baixo'] body:has(.home[data-tone='dark']) .nav__right,
+:root[data-perf='baixo'] body:has(.case[data-tone='dark']) .nav__right,
 :root[data-perf='baixo'] .case[data-tone='dark'] .glass {
   background: rgba(18, 16, 20, 0.84);
   box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);

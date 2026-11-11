@@ -221,3 +221,31 @@
     animation: none;
   }
 }
+
+/* Celular e tablet: o fim da abertura sem filtros pesados. O desfoque no site
+   inteiro (com vidro e 3D por trás) e o vidro na borda da bolha faziam a tela
+   piscar logo depois da abertura. Fica o zoom (só transform) e a borda clara. */
+@media (hover: none), (pointer: coarse) {
+  .oi-zoom-in {
+    animation-name: oi-zoom-in-lite;
+  }
+  .oi-rim {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@keyframes oi-zoom-in-lite {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oi-zoom-in {
+    animation: none;
+  }
+}

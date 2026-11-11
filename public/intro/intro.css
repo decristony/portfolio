@@ -124,64 +124,6 @@
   opacity: 0;
 }
 
-/* ---------- bolha de vidro (como a do clique num projeto) ---------- */
-.oi-rim {
-  --edge: 85%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 2;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  translate: -50% -50%;
-  /* só a faixa da borda refrata: desfoca, satura e clareia o que passa por ela */
-  -webkit-backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
-  backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
-  -webkit-mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
-  mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-    inset 0 0 40px rgba(255, 255, 255, 0.18),
-    0 0 60px rgba(255, 255, 255, 0.12);
-}
-
-/* aberração cromática fina: duas bordas coloridas levemente deslocadas */
-.oi-rim::before,
-.oi-rim::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-}
-
-.oi-rim::before {
-  box-shadow: inset 2px 0 0 rgba(255, 70, 90, 0.45);
-}
-
-.oi-rim::after {
-  box-shadow: inset -2px 0 0 rgba(60, 200, 255, 0.45);
-}
-
-/* o site atrás da bolha entra com zoom e foco, como se a câmera chegasse nele */
-.oi-zoom-in {
-  animation: oi-zoom-in 1.7s cubic-bezier(0.45, 0, 0.2, 1) both;
-  transform-origin: 50% 50%;
-}
-
-@keyframes oi-zoom-in {
-  from {
-    transform: scale(1.14);
-    filter: blur(10px) saturate(1.2);
-  }
-  to {
-    transform: none;
-    filter: none;
-  }
-}
-
 /* botão discreto para pular */
 .oi-skip {
   position: absolute;
@@ -216,36 +158,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .oi-grain,
-  .oi-zoom-in {
-    animation: none;
-  }
-}
-
-/* Celular e tablet: o fim da abertura sem filtros pesados. O desfoque no site
-   inteiro (com vidro e 3D por trás) e o vidro na borda da bolha faziam a tela
-   piscar logo depois da abertura. Fica o zoom (só transform) e a borda clara. */
-@media (hover: none), (pointer: coarse) {
-  .oi-zoom-in {
-    animation-name: oi-zoom-in-lite;
-  }
-  .oi-rim {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}
-
-@keyframes oi-zoom-in-lite {
-  from {
-    transform: scale(1.14);
-  }
-  to {
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .oi-zoom-in {
+  .oi-grain {
     animation: none;
   }
 }

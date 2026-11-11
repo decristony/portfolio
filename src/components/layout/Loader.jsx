@@ -4,14 +4,14 @@ import { loadIntro } from '../../lib/intro';
 
 /*
  * Abertura da primeira visita da sessão, já com som. Todo o roteiro (saudações
- * e "Olá mundo" digitados numa página só, e a bolha de vidro que
+ * e "Olá mundo" digitados numa página só, e o fade que
  * revela Projetos) e os sons vivem em public/intro/intro.js, o mesmo arquivo
  * usado pela prévia preview/abertura.html.
  *
  * Abertura primeiro: o index.html já carrega intro.js antes do React e a
  * abertura começa sozinha (window.__oiBoot). Este componente só liga o som e o
  * fim dela ao site, e avisa quando o site terminou de carregar por trás, para a
- * bolha abrir sobre a página pronta. Se o index.html não iniciou a abertura,
+ * abertura sumir sobre a página pronta. Se o index.html não iniciou a abertura,
  * cai no caminho antigo: carrega intro.js daqui.
  */
 export const INTRO_KEY = 'orvion:intro-seen';
@@ -63,7 +63,6 @@ export function Loader({ onDone }) {
       .then(() => {
         if (!alive) return;
         cancel = window.OrvionIntro.play({
-          revealTarget: '#root', // o site entra com zoom atrás da bolha
           sound: true, // a abertura já começa com som
           ready: whenSiteReady(),
           onSound: (on) => setSound(on),

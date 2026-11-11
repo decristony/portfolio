@@ -12,8 +12,7 @@
  *     até "Boas-vindas".
  *  2. No mesmo lugar, "Olá mundo" e "Hello world" são digitados juntos.
  *  3. A barrinha pisca 3 vezes.
- *  4. Uma bolha de vidro abre do centro (o mesmo efeito do clique num projeto)
- *     e revela Projetos, que entra com zoom; o lo-fi começa.
+ *  4. A abertura some num fade e mostra Projetos; o lo-fi começa.
  * Som da abertura: só a digitação. Som de Projetos: o lo-fi. Tudo sintetizado na
  * hora (Web Audio), sem arquivos.
  */
@@ -268,21 +267,18 @@
   const GREETINGS = ['Olá', 'Hello', 'Bonjour', 'Ciao', 'Hola', 'Hallo', 'こんにちは', 'Boas-vindas'];
   const LINES = ['Olá mundo', 'Hello world'];
 
-  const clamp01 = (v) => Math.min(1, Math.max(0, v));
-  const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2); // power2.inOut, como a bolha do clique
-  const REVEAL_MS = 1700;
+  const FADE_MS = 600; // igual à transição de opacidade de .oi (intro.css)
 
   function play(opts) {
     const o = Object.assign(
       {
         root: document.body,
-        revealTarget: '#root', // o que dá o zoom de entrada por trás da bolha
         sound: true, // com som por padrão
         reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
         onSound: function () {},
         onDone: function () {},
         onReveal: function () {},
-        // abertura primeiro: antes da bolha, espera o site avisar que está pronto (com teto)
+        // abertura primeiro: antes da saída, espera o site avisar que está pronto (com teto)
         ready: Promise.resolve(),
         readyTimeout: 6000,
       },
@@ -291,7 +287,6 @@
 
     let alive = true;
     const timers = [];
-    let frame = 0;
     const wait = (ms) =>
       new Promise((res, rej) => {
         timers.push(
@@ -313,16 +308,13 @@
         <p class="oi-hello" aria-hidden="true" hidden><span></span></p>
         <div class="oi-type" aria-hidden="true" hidden><p></p><p></p></div>
       </div>
-      <div class="oi-rim" aria-hidden="true"></div>
       <button type="button" class="oi-skip" hidden>Pular abertura</button>`;
     o.root.appendChild(el);
 
-    const stage = el.querySelector('.oi-stage');
     const hello = el.querySelector('.oi-hello');
     const helloText = hello.querySelector('span');
     const type = el.querySelector('.oi-type');
     const lines = Array.prototype.slice.call(type.querySelectorAll('p'));
-    const rim = el.querySelector('.oi-rim');
     const skip = el.querySelector('.oi-skip');
 
     const caret = document.createElement('span');
@@ -348,37 +340,10 @@
       }
     }
 
-    /* ---------- bolha de vidro: abre do centro e revela Projetos ---------- */
+    /* ---------- saída: a abertura some num fade simples e mostra Projetos ---------- */
     function reveal() {
-      return new Promise((res) => {
-        const target = o.revealTarget ? document.querySelector(o.revealTarget) : null;
-        if (target) target.classList.add('oi-zoom-in'); // o site entra com zoom e foco
-        el.classList.add('is-revealing');
-        const t0 = performance.now();
-        const run = (now) => {
-          const W = window.innerWidth;
-          const H = window.innerHeight;
-          const max = Math.hypot(W, H) / 2 + 80;
-          const t = clamp01((now - t0) / REVEAL_MS);
-          const r = easeInOut(t) * max;
-          // a página escura ganha um buraco redondo que cresce...
-          const mask = `radial-gradient(circle at 50% 50%, transparent ${r}px, #000 ${r + 1.5}px)`;
-          stage.style.webkitMaskImage = mask;
-          stage.style.maskImage = mask;
-          // ...com uma borda de vidro que refrata o que passa por ela
-          const band = Math.max(18, r * 0.16);
-          rim.style.width = `${(r + band) * 2}px`;
-          rim.style.height = `${(r + band) * 2}px`;
-          rim.style.setProperty('--edge', `${(r / (r + band)) * 100}%`);
-          rim.style.opacity = String(1 - Math.pow(t, 3));
-          if (t < 1) frame = requestAnimationFrame(run);
-          else {
-            if (target) setTimeout(() => target.classList.remove('oi-zoom-in'), 400);
-            res();
-          }
-        };
-        frame = requestAnimationFrame(run);
-      });
+      el.classList.add('is-revealing', 'is-gone');
+      return new Promise((res) => setTimeout(res, FADE_MS));
     }
 
     /* ---------- fim ---------- */
@@ -392,11 +357,8 @@
       if (fast) el.classList.add('is-gone');
       setTimeout(
         () => {
-          cancelAnimationFrame(frame);
           window.removeEventListener('keydown', onKey);
           unlockEvents.forEach((ev) => window.removeEventListener(ev, unlock));
-          const target = o.revealTarget ? document.querySelector(o.revealTarget) : null;
-          if (target) target.classList.remove('oi-zoom-in');
           el.remove();
         },
         fast ? 650 : 0,
@@ -453,7 +415,7 @@
       // o site carregou por trás durante o roteiro; se ainda não, segura aqui (no máximo readyTimeout)
       await Promise.race([o.ready, wait(o.readyTimeout)]);
 
-      // 4. a bolha de vidro abre e entra em Projetos
+      // 4. a abertura some num fade e entra em Projetos
       o.onReveal();
       type.classList.add('is-out');
       if (sfx.on) Lofi.start();
@@ -506,7 +468,7 @@
         boot.sound = on;
         if (boot.onSound) boot.onSound(on);
       },
-      // a bolha abre: o fundo escuro do primeiro quadro sai para o site aparecer pelo buraco
+      // a saída começa: o fundo escuro do primeiro quadro sai para o site aparecer no fade
       onReveal: () => docEl.classList.remove('intro-on'),
       onDone: () => {
         boot.done = true;

@@ -287,7 +287,7 @@ export const portfolioData = {
     ],
     experience: [
       { period: '2026 — atual', role: 'Direção de arte e web design', company: 'OrvionWeb' },
-      { period: '2019 — atual', role: 'Web designer e desenvolvedor', company: 'Independente' },
+      { period: '2019 — 2026', role: 'Web designer e desenvolvedor', company: 'Independente' },
     ],
     // Ferramentas no lugar de prêmios (a página Sobre mostra esta lista).
     recognition: [
@@ -295,7 +295,7 @@ export const portfolioData = {
       { year: 'CMS', title: 'WordPress, Elementor e WooCommerce' },
       { year: 'Back-end', title: 'PHP e Java' },
       { year: 'Imagem', title: 'Photoshop avançado' },
-      { year: 'Marketing', title: 'Tráfego pago, SEO e ad creatives' },
+      { year: 'Marketing', title: 'SEO e ad creatives' },
     ],
     portrait: asset('/about/tony.webp'),
   },

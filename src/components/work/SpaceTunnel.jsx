@@ -46,13 +46,15 @@ const vertexShader = `
 
 const fragmentShader = `
   uniform sampler2D map;
+  uniform float flipV; // 1 = imagem de cabeça para baixo (ImageBitmap não vira no envio)
   uniform float opacity;
   uniform float blurAmount;
   uniform float aspect;       // largura / altura da capa
   uniform float cornerRadius; // raio do canto, em fração da altura
   varying vec2 vUv;
   void main() {
-    vec4 color = texture2D(map, vUv);
+    vec2 uv = vec2(vUv.x, mix(vUv.y, 1.0 - vUv.y, flipV));
+    vec4 color = texture2D(map, uv);
     if (blurAmount > 0.01) {
       vec2 texel = 1.0 / vec2(textureSize(map, 0));
       vec4 sum = vec4(0.0);
@@ -60,7 +62,7 @@ const fragmentShader = `
       for (float x = -2.0; x <= 2.0; x += 1.0) {
         for (float y = -2.0; y <= 2.0; y += 1.0) {
           float w = 1.0 / (1.0 + length(vec2(x, y)));
-          sum += texture2D(map, vUv + vec2(x, y) * texel * blurAmount) * w;
+          sum += texture2D(map, uv + vec2(x, y) * texel * blurAmount) * w;
           total += w;
         }
       }
@@ -96,6 +98,7 @@ const createMaterial = () =>
       scrollForce: { value: 0 },
       time: { value: 0 },
       waveT: { value: 99 },
+      flipV: { value: 0 },
     },
     vertexShader,
     fragmentShader,
@@ -163,19 +166,43 @@ const waitIdle = (ms) =>
     }, ms);
   });
 
+// largura da textura: o quanto a capa em foco ocupa na tela, em pixels reais
+// (celular ~700 px em vez dos 1616 px do arquivo: 5× menos para enviar)
+const coverWidth = () => {
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+  return Math.round(Math.min(1616, Math.max(640, window.innerWidth * 0.84 * dpr)));
+};
+
 async function loadCover(project) {
   if (!project.cover) return paletteTexture(project);
   const hit = coverCache.get(project.cover);
   if (hit) return hit;
-  const img = new Image();
-  img.decoding = 'async';
-  img.src = project.cover;
+  let texture;
   try {
-    await img.decode();
+    // decodifica e reduz fora da thread principal, já no tamanho que a tela usa;
+    // a imagem pronta sobe para a placa de vídeo sem conversão (era o que travava)
+    const blob = await (await fetch(project.cover)).blob();
+    if (!blob.type.startsWith('image/')) throw new Error('não é imagem');
+    const bitmap = await createImageBitmap(blob, {
+      resizeWidth: coverWidth(),
+      resizeQuality: 'high',
+      premultiplyAlpha: 'none',
+      colorSpaceConversion: 'none',
+    });
+    texture = new THREE.Texture(bitmap);
+    texture.flipY = false; // o WebGL ignora o flipY em ImageBitmap: o shader vira (flipV)
   } catch {
-    return paletteTexture(project);
+    // navegador sem createImageBitmap (ou capa com erro): caminho antigo
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = project.cover;
+      await img.decode();
+      texture = new THREE.Texture(img);
+    } catch {
+      return paletteTexture(project);
+    }
   }
-  const texture = new THREE.Texture(img);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.needsUpdate = true;
   coverCache.set(project.cover, texture);
@@ -400,6 +427,9 @@ function TunnelScene({
     if (!ready.current && textures.current[s.focus.project]) {
       // a capa em foco já está na placa de vídeo: a Sanfona por cima já pode sair
       ready.current = true;
+      // a capa do foco entra já inteira (a Sanfona-ponte cobre a troca): se ela
+      // surgisse aos poucos, a de trás apareceria através dela, "por cima"
+      appear.current[s.focus.project] = 1;
       onReady?.();
     }
     // as capas só saem da pilha depois que a do foco chegou
@@ -437,12 +467,15 @@ function TunnelScene({
         if (mesh) mesh.visible = false;
         return opacity;
       }
-      const shown = opacity * appear.current[item.project];
+      // nenhuma capa de trás fica mais visível que a do foco: sempre surgem por trás
+      const front = appear.current[s.focus.project];
+      const shown = opacity * (item === s.focus ? appear.current[item.project] : Math.min(appear.current[item.project], front));
       const base = spot(item.seq, spreadX, spreadY);
       const extra = Math.max(0, d - focusD);
       const dir = item.seq * 2.399963 + 0.8;
       const mat = materials[item.slot];
       mat.uniforms.map.value = tex;
+      mat.uniforms.flipV.value = tex.flipY ? 0 : 1;
       mat.uniforms.opacity.value = shown;
       // nível baixo: sem o desfoque de profundidade (25 leituras de textura por pixel)
       mat.uniforms.blurAmount.value =

@@ -167,21 +167,16 @@ const waitIdle = (ms) =>
   });
 
 /*
- * Nitidez: a capa em foco fica parada na resolução cheia da tela (até 2,5×) e
- * só durante a troca o 3D desenha com menos pixels (o nível do aparelho).
- * Em movimento ninguém nota o borrão; parada, a capa da frente está sempre nítida.
- * As de trás já são desfocadas de propósito, então o custo extra parado é quase
- * todo da capa da frente, que tem o shader mais barato (uma leitura por pixel).
+ * Nitidez: uma resolução só, escolhida uma vez pelo nível do aparelho (até 2×).
+ * Não muda durante o uso: trocar a resolução do 3D recria a imagem do canvas,
+ * que fica vazia por um quadro, e no celular isso aparecia como a tela piscando.
  */
-const restDpr = () => Math.min(window.devicePixelRatio || 1, 2.5);
-const moveDpr = (tier) => Math.min(window.devicePixelRatio || 1, tier === 'alto' ? 1.75 : tier === 'medio' ? 1.5 : 1);
-const SETTLE_S = 1.1; // tempo da troca (câmera e capas assentam) antes de voltar a ficar nítido
+const sceneDpr = (tier) => Math.min(window.devicePixelRatio || 1, tier === 'baixo' ? 1.5 : 2);
 
 // largura da textura: o quanto a capa em foco ocupa na tela, em pixels reais
 // (celular ~700 px em vez dos 1616 px do arquivo: 5× menos para enviar)
-// (a capa em foco fica parada na resolução cheia da tela: ver restDpr)
 const coverWidth = () => {
-  const dpr = restDpr();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   return Math.round(Math.min(1616, Math.max(640, window.innerWidth * 0.84 * dpr)));
 };
 
@@ -284,9 +279,6 @@ function TunnelScene({
   tier = 'alto',
 }) {
   const { camera, size, gl } = useThree();
-  const setDpr = useThree((st) => st.setDpr);
-  const sharp = useRef(null); // resolução atual: true = cheia (parado), false = da troca
-  const movedAt = useRef(-99);
   const total = projects.length;
 
   // capas chegam uma por uma (ver useCoverQueue); até chegar, a capa não aparece
@@ -403,7 +395,6 @@ function TunnelScene({
     if (stepRef.current) {
       s.phase += stepRef.current;
       stepRef.current = 0;
-      movedAt.current = time;
     }
 
     while (s.phase >= 1) {
@@ -434,7 +425,6 @@ function TunnelScene({
 
     if (lastProject.current !== s.focus.project) {
       lastProject.current = s.focus.project;
-      movedAt.current = time; // clique numa capa de trás também é troca
       onFocusChange?.(s.focus.project);
     }
 
@@ -463,13 +453,6 @@ function TunnelScene({
     c.y += c.vy * dt;
     const travel = Math.min(1, Math.hypot(target.x - c.x, target.y - c.y) / spreadX);
 
-    // parado = nítido; trocando = resolução do nível (só muda quando o estado muda)
-    if (travel > 0.02 || s.leaving.length) movedAt.current = Math.max(movedAt.current, time - SETTLE_S + 0.35);
-    const still = ready.current && introT.current >= 1 && time - movedAt.current > SETTLE_S;
-    if (still !== sharp.current) {
-      sharp.current = still;
-      setDpr(still ? restDpr() : moveDpr(tier));
-    }
     c.roll = smooth(c.roll, THREE.MathUtils.clamp(-c.vx * 0.012, -0.08, 0.08), 6, dt);
     camera.position.set(c.x, c.y, travel * focusD * 0.55);
     camera.rotation.set(c.vy * 0.004, -c.vx * 0.004, c.roll);
@@ -674,9 +657,8 @@ export default function SpaceTunnel({
           a cena recomeça do projeto em foco a cada vez que a vista volta */}
       <Canvas
         camera={{ position: [0, 0, 0], fov: 55 }}
-        // alto: como sempre; médio e baixo desenham menos pixels e sem antialias
-        // começa na resolução da troca; parado, a cena sobe para a resolução cheia
-        dpr={moveDpr(tier)}
+        // resolução fixa (ver sceneDpr); antialias só no nível alto
+        dpr={sceneDpr(tier)}
         gl={{ antialias: tier === 'alto', alpha: true }}
         frameloop={active ? 'always' : 'never'}
       >

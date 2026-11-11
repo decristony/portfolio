@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTier } from '../../lib/perfTier';
 
 /*
  * Céu estrelado: um campo de estrelas que cintilam e derivam bem devagar, em
@@ -16,12 +17,15 @@ const rand = (a, b) => a + Math.random() * (b - a);
 
 export function StarsBackdrop({ className = 'case__pulse case__stars' }) {
   const canvasRef = useRef(null);
+  const tier = useTier();
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!ctx) return undefined;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // nível baixo: céu parado, como no "reduzir movimento"
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || tier === 'baixo';
+    const maxDpr = tier === 'alto' ? 2 : tier === 'medio' ? 1.5 : 1;
     let w = 0;
     let h = 0;
     let stars = [];
@@ -47,7 +51,7 @@ export function StarsBackdrop({ className = 'case__pulse case__stars' }) {
     };
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       w = window.innerWidth;
       h = window.innerHeight;
       canvas.width = Math.round(w * dpr);
@@ -135,14 +139,23 @@ export function StarsBackdrop({ className = 'case__pulse case__stars' }) {
       }
     }
 
+    // aba oculta: o loop para; ao voltar, recomeça sem salto (last zerado)
+    const onVisibility = () => {
+      cancelAnimationFrame(frame);
+      last = 0;
+      if (!document.hidden && !reduced) frame = requestAnimationFrame(draw);
+    };
+
     resize();
     window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', onVisibility);
     if (!reduced) frame = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, []);
+  }, [tier]);
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
 }

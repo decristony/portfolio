@@ -5,7 +5,8 @@ import { playGlassReveal } from '../components/layout/GlassReveal';
 import { casePostRect } from '../lib/caseLayout';
 import { madeFor } from '../lib/projectText';
 import { hasWebGL } from '../lib/webgl';
-import { loadIntro } from '../lib/intro';
+import { loadIntro, useIntroDone } from '../lib/intro';
+import { getTier, noteTransition, useTier } from '../lib/perfTier';
 import { portfolioData, padIndex } from '../data/portfolioData';
 import { useBodyLock, useDocumentTitle, useMediaQuery, usePrefersReducedMotion } from '../hooks/useUI';
 import { useSound } from '../context/SoundContext';
@@ -26,12 +27,17 @@ const VIEWS = [
   { id: 'stack', label: 'Sanfona' },
 ];
 
+// vista escolhida antes pela pessoa; sem escolha, aparelho fraco (nível baixo)
+// começa na Sanfona, bem mais leve que o túnel 3D (dá para trocar no botão)
 const readView = () => {
+  let saved = null;
   try {
-    return localStorage.getItem(VIEW_KEY) === 'stack' ? 'stack' : 'space';
+    saved = localStorage.getItem(VIEW_KEY);
   } catch {
-    return 'space';
+    /* sem armazenamento: usa o padrão */
   }
+  if (saved === 'stack' || saved === 'space') return saved;
+  return getTier() === 'baixo' ? 'stack' : 'space';
 };
 
 /*
@@ -45,6 +51,11 @@ export function Work() {
   const [webgl] = useState(hasWebGL);
   const [view, setView] = useState(readView);
   const space = view === 'space' && webgl;
+  const tier = useTier();
+  const introDone = useIntroDone();
+  // o túnel (three.js + 14 texturas) só monta depois da abertura: durante ela a
+  // Sanfona-ponte segura a tela. No nível baixo, só monta se a vista for Espacial.
+  const tunnel = webgl && introDone && (space || tier !== 'baixo');
   const [switched, setSwitched] = useState(false); // troca de vista nesta visita: anima a passagem
   // ponte: a Sanfona fica por cima do 3D até o primeiro quadro dele ficar pronto,
   // e some devagar enquanto as capas se separam (nada pisca nem some na troca)
@@ -114,11 +125,13 @@ export function Work() {
 
   useEffect(() => {
     if (bridge === 'off') return undefined;
+    // túnel ainda não montado (abertura rodando): a ponte fica, sem prazo
+    if (bridge === 'on' && !tunnel) return undefined;
     // 'fading': some em 0,5 s. 'on': se o 3D demorar demais (aba em segundo plano,
     // placa de vídeo lenta), a ponte sai mesmo assim para não ficar na frente
     const id = window.setTimeout(() => setBridge(bridge === 'fading' ? 'off' : 'fading'), bridge === 'fading' ? 500 : 12000);
     return () => window.clearTimeout(id);
-  }, [bridge]);
+  }, [bridge, tunnel]);
 
   // um projeto para frente ou para trás, nas duas vistas
   const move = (dir) => {
@@ -135,6 +148,7 @@ export function Work() {
     if (lastFocus.current === focus) return;
     lastFocus.current = focus;
     playClick();
+    noteTransition(); // mede o FPS da troca e rebaixa o nível se o aparelho não aguentar
   }, [focus, playClick]);
 
   const stack = (
@@ -161,7 +175,7 @@ export function Work() {
       <ProjectBackdrop theme={theme} project={project} activeKey={project.slug} reduced={reduced} />
 
       {/* o 3D fica montado nas duas vistas (só roda na Espacial): voltar para ela é imediato */}
-      {webgl && (
+      {tunnel && (
         <Suspense fallback={null}>
           <SpaceTunnel
             projects={projects}

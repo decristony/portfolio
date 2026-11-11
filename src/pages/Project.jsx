@@ -147,6 +147,7 @@ export function Project() {
           srcSet={`${project.postSmall} 800w, ${project.post} 1400w`}
           sizes="(max-width: 1099px) 100vw, 62vw"
           decoding="async"
+          fetchPriority="high" // é o LCP da página
           alt={`${capitalize(project.title)}: apresentação do projeto`}
           onLoad={() => setPostReady(true)}
           ref={(img) => {
@@ -167,7 +168,7 @@ export function Project() {
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          <img src={project.postSmall} alt="" draggable="false" decoding="async" />
+          <img src={project.postSmall} alt="" draggable="false" decoding="async" fetchPriority="low" />
           <span className="case__map-lens" ref={lensRef} aria-hidden="true" />
         </div>
       </aside>

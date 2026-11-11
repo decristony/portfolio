@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTier } from '../../lib/perfTier';
 
 /*
  * Fundo de pulso: linhas de eletrocardiograma atravessando a tela, como num
@@ -25,19 +26,22 @@ const hexToRgb = (hex) => {
 
 export function PulseBackdrop({ color = '#B21E2D', className = 'case__pulse' }) {
   const canvasRef = useRef(null);
+  const tier = useTier();
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!ctx) return undefined;
     const rgb = hexToRgb(color);
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // nível baixo: o mesmo quadro parado do "reduzir movimento"
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || tier === 'baixo';
+    const maxDpr = tier === 'alto' ? 2 : tier === 'medio' ? 1.5 : 1;
     let w = 0;
     let h = 0;
     let frame = 0;
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       w = window.innerWidth;
       h = window.innerHeight;
       canvas.width = Math.round(w * dpr);
@@ -89,14 +93,22 @@ export function PulseBackdrop({ color = '#B21E2D', className = 'case__pulse' }) 
       if (!reduced) frame = requestAnimationFrame(draw);
     }
 
+    // aba oculta: o loop para; ao voltar, recomeça
+    const onVisibility = () => {
+      cancelAnimationFrame(frame);
+      if (!document.hidden && !reduced) frame = requestAnimationFrame(draw);
+    };
+
     resize();
     window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', onVisibility);
     if (!reduced) frame = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [color]);
+  }, [color, tier]);
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
 }

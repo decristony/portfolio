@@ -10,4 +10,9 @@ export default defineConfig({
     tailwindcss(),
     react(),
   ],
+  build: {
+    // o único chunk acima de 500 kB é o three.js (~190 kB gzip), que já vem
+    // sob demanda (só com o túnel 3D), fora do pacote inicial
+    chunkSizeWarningLimit: 800,
+  },
 })

@@ -17,7 +17,7 @@ export function About() {
 
       <div className="about-grid">
         <figure className="about-portrait">
-          <img src={about.portrait} alt={`${site.name} — studio detail`} />
+          <img src={about.portrait} alt={`${site.name}: detalhe do estúdio`} decoding="async" />
         </figure>
 
         <div className="about-bio">

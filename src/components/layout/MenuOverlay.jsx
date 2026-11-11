@@ -22,19 +22,47 @@ const LINKS = [
  */
 export function MenuOverlay({ onClose }) {
   const closeRef = useRef(null);
+  const panelRef = useRef(null);
+  const onCloseRef = useRef(onClose);
   const { pathname } = useLocation();
   const time = useLiveClock(site.timezone);
   const reduced = usePrefersReducedMotion();
   const { playHover, playClick } = useSound();
 
   useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  // foco: entra no botão fechar, fica preso na gaveta (Tab) e volta para quem
+  // abriu o menu ao fechar. Roda só ao abrir (antes rodava a cada render do App
+  // e o foco pulava de volta para o fechar).
+  useEffect(() => {
+    const opener = document.activeElement;
     closeRef.current?.focus();
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab' || !panelRef.current) return;
+      const items = [...panelRef.current.querySelectorAll('a[href], button:not([disabled])')];
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !panelRef.current.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, []);
 
   const slide = reduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
@@ -63,6 +91,7 @@ export function MenuOverlay({ onClose }) {
       />
 
       <motion.aside
+        ref={panelRef}
         className="drawer__panel glass"
         {...slide}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}

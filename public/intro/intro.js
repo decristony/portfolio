@@ -83,7 +83,8 @@
     on: false,
     // tecla: um "tic" de máquina macia, um pouco diferente a cada vez
     tick(vol) {
-      if (!sfx.on || !ctx) return;
+      // áudio ainda bloqueado (sem gesto): não cria nós, que só geram aviso no console
+      if (!sfx.on || !ctx || ctx.state !== 'running') return;
       const t = ctx.currentTime;
       const src = ctx.createBufferSource();
       src.buffer = noiseBuf;
@@ -191,6 +192,12 @@
     }
 
     function schedule() {
+      // áudio ainda bloqueado: espera o primeiro gesto sem criar notas (cada
+      // nota criada num contexto suspenso gerava um aviso no console)
+      if (ctx.state !== 'running') {
+        nextTime = ctx.currentTime + 0.1;
+        return;
+      }
       const beat = 60 / BPM;
       const eighth = beat / 2;
       while (nextTime < ctx.currentTime + 0.25) {
@@ -274,6 +281,10 @@
         reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
         onSound: function () {},
         onDone: function () {},
+        onReveal: function () {},
+        // abertura primeiro: antes da bolha, espera o site avisar que está pronto (com teto)
+        ready: Promise.resolve(),
+        readyTimeout: 6000,
       },
       opts || {},
     );
@@ -439,7 +450,11 @@
         await wait(240);
       }
 
+      // o site carregou por trás durante o roteiro; se ainda não, segura aqui (no máximo readyTimeout)
+      await Promise.race([o.ready, wait(o.readyTimeout)]);
+
       // 4. a bolha de vidro abre e entra em Projetos
+      o.onReveal();
       type.classList.add('is-out');
       if (sfx.on) Lofi.start();
       await reveal();
@@ -472,4 +487,33 @@
   window.OrvionIntro = { play };
   window.OrvionLofi = Lofi;
   window.OrvionSound = { resume, sfx };
+
+  /* ======================================================================
+     Abertura primeiro: o index.html marca <html class="intro-on"> e carrega
+     este arquivo antes do React. A abertura começa aqui, sem esperar o site,
+     e o React só se liga a ela (components/layout/Loader.jsx) via __oiBoot.
+     ====================================================================== */
+  const docEl = document.documentElement;
+  if (docEl.classList.contains('intro-on') && !window.__oiBoot) {
+    let readyRes;
+    const ready = new Promise((r) => (readyRes = r));
+    window.__orvionSiteReady = () => readyRes();
+    // waiters: quem espera a abertura terminar para montar o que é pesado (túnel 3D)
+    const boot = (window.__oiBoot = { sound: null, done: false, onSound: null, onDone: null, waiters: [] });
+    boot.cancel = play({
+      ready,
+      onSound: (on) => {
+        boot.sound = on;
+        if (boot.onSound) boot.onSound(on);
+      },
+      // a bolha abre: o fundo escuro do primeiro quadro sai para o site aparecer pelo buraco
+      onReveal: () => docEl.classList.remove('intro-on'),
+      onDone: () => {
+        boot.done = true;
+        docEl.classList.remove('intro-on');
+        if (boot.onDone) boot.onDone();
+        boot.waiters.splice(0).forEach((fn) => fn());
+      },
+    });
+  }
 })();

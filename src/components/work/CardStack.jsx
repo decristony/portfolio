@@ -128,6 +128,7 @@ export function CardStack({
                 alt=""
                 draggable="false"
                 decoding="async"
+                fetchPriority={front ? 'high' : 'low'} // a capa da frente é o LCP de Projetos
                 onLoad={(e) => {
                   const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
                   if (w && h && ratios.get(project.cover) !== w / h) {

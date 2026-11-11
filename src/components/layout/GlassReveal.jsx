@@ -7,9 +7,12 @@
  * tela está coberta. A bolha mostra a página já no tamanho final: fundo do
  * projeto (bg) e o post dentro do retângulo da coluna central (rect).
  * Depois disso a camada some sozinha.
- * O three.js só é baixado depois que a página abre (fora do pacote inicial).
+ * O three.js e o contexto WebGL só são criados no primeiro clique (a bolha só
+ * existe a partir de Projetos, onde o túnel 3D já baixou o three.js). Antes,
+ * toda página baixava o three.js e abria um contexto WebGL logo ao carregar.
  */
 import { useEffect, useRef } from 'react';
+import { getTier } from '../../lib/perfTier';
 
 const DURATION = 1.7; // segundos para a bolha cobrir a tela
 const FADE = 0.55; // segundos para a camada sumir depois da troca de página
@@ -102,9 +105,19 @@ export function GlassRevealHost() {
   useEffect(() => {
     let cleanup = () => {};
     let alive = true;
-    import('three').then((THREE) => {
-      if (alive) cleanup = setup(THREE, canvasRef.current);
-    });
+    let loading = null;
+    // primeiro pedido: baixa o three.js e monta o renderizador; o setup troca
+    // o wake pelo de verdade e já toca o pedido que estava esperando
+    wake = () => {
+      loading ??= import('three')
+        .then((THREE) => {
+          if (alive) cleanup = setup(THREE, canvasRef.current);
+        })
+        .catch(() => {
+          request?.resolve(); // sem o motor 3D, a troca de página segue sem a bolha
+          request = null;
+        });
+    };
     return () => {
       alive = false;
       wake = null;
@@ -128,7 +141,8 @@ function setup(THREE, canvas) {
     wake();
     return () => {};
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const tier = getTier();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, tier === 'alto' ? 2 : tier === 'medio' ? 1.5 : 1));
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   const material = new THREE.ShaderMaterial({

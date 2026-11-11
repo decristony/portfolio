@@ -13,6 +13,12 @@ const SoundContext = createContext({
 
 const STORAGE_KEY = 'portfolio:sound';
 
+// dá o src ao áudio na primeira vez que ele é preciso (aí o navegador baixa)
+const ready = (audio) => {
+  if (audio && !audio.getAttribute('src')) audio.src = audio.dataset.src;
+  return audio;
+};
+
 export function SoundProvider({ children }) {
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try {
@@ -26,8 +32,10 @@ export function SoundProvider({ children }) {
 
   useEffect(() => {
     const create = (src, volume) => {
-      const audio = new Audio(src);
+      // sem src ainda: o arquivo só é baixado quando o som é ligado (efeito abaixo)
+      const audio = new Audio();
       audio.preload = 'auto';
+      audio.dataset.src = src;
       audio.volume = volume;
       return audio;
     };
@@ -39,10 +47,16 @@ export function SoundProvider({ children }) {
     };
   }, []);
 
+  // som ligado: agora sim baixa os efeitos (com som desligado, nada é baixado)
+  useEffect(() => {
+    if (!soundEnabled) return;
+    Object.values(cache.current).forEach(ready);
+  }, [soundEnabled]);
+
   const play = useCallback(
     (name, volume) => {
       if (!soundEnabled) return;
-      const source = cache.current[name];
+      const source = ready(cache.current[name]);
       if (!source) return;
       try {
         const audio = source.cloneNode();
@@ -79,7 +93,7 @@ export function SoundProvider({ children }) {
         /* ignore */
       }
       if (next) {
-        const audio = cache.current.click?.cloneNode();
+        const audio = ready(cache.current.click)?.cloneNode();
         if (audio) {
           audio.volume = 0.28;
           audio.play().catch(() => {});

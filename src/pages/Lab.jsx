@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { portfolioData } from '../data/portfolioData';
 import { useDocumentTitle, useMediaQuery, usePrefersReducedMotion } from '../hooks/useUI';
+import { useTier } from '../lib/perfTier';
 import { useSound } from '../context/SoundContext';
 import { IconArrowUpRight } from '../components/Icons';
 import { ProjectCover } from '../components/ProjectCover';
@@ -16,7 +17,8 @@ const rowProps = (project) =>
 /*
  * Lente de vidro líquido (@ybouane/liquidglass): desliza sobre a lista,
  * refrata os títulos por baixo e mostra capa, nome e paleta do projeto.
- * Só liga com mouse e sem "reduzir movimento"; senão cai na prévia simples.
+ * Só liga com mouse, sem "reduzir movimento" e no nível alto de aparelho;
+ * senão cai na prévia simples.
  */
 const LENS_CONFIG = {
   cornerRadius: 30,
@@ -44,7 +46,9 @@ export function Lab() {
   const listRef = useRef(null);
   const lensRef = useRef(null);
   const glassRef = useRef(null);
-  const lensEnabled = finePointer && !reduced;
+  const tier = useTier();
+  // a lente é WebGL por cima da lista: só no nível alto (nos outros, a prévia simples)
+  const lensEnabled = finePointer && !reduced && tier === 'alto';
 
   useDocumentTitle(`Laboratório — ${site.name}`);
 

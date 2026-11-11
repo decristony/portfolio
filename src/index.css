@@ -296,10 +296,12 @@ h1,
     border-color 0.3s var(--ease);
 }
 
-.pill:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--bg);
+@media (hover: hover) {
+  .pill:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
 }
 
 .underline {
@@ -318,10 +320,16 @@ h1,
   transform-origin: 100% 50%;
   transition: transform 0.5s var(--ease);
 }
-.underline:hover::after,
 .underline:focus-visible::after {
   transform: scaleX(1);
   transform-origin: 0 50%;
+}
+
+@media (hover: hover) {
+  .underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: 0 50%;
+  }
 }
 
 .skip-link {
@@ -402,10 +410,16 @@ h1,
   transition: transform 0.45s var(--ease);
 }
 
-.nav__link:hover::after,
 .nav__link.is-active::after {
   transform: scaleX(1);
   transform-origin: 0 50%;
+}
+
+@media (hover: hover) {
+  .nav__link:hover::after {
+    transform: scaleX(1);
+    transform-origin: 0 50%;
+  }
 }
 
 .nav__right {
@@ -886,8 +900,10 @@ h1,
   transition: background 0.4s var(--ease), padding 0.4s var(--ease);
 }
 
-.work-row:hover {
-  background: rgba(255, 255, 255, 0.34);
+@media (hover: hover) {
+  .work-row:hover {
+    background: rgba(255, 255, 255, 0.34);
+  }
 }
 
 .work-row__index {
@@ -946,9 +962,11 @@ h1,
     background 0.35s var(--ease);
 }
 
-.work-row:hover .work-row__arrow {
-  opacity: 1;
-  transform: translateX(0);
+@media (hover: hover) {
+  .work-row:hover .work-row__arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .work-row__arrow svg {
@@ -1174,9 +1192,11 @@ h1,
   transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 
-.contact__email:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .contact__email:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
 }
 
 .contact__copy {
@@ -1226,9 +1246,11 @@ h1,
   transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
 
-.contact__group a:hover svg {
-  opacity: 1;
-  transform: translate(0, 0);
+@media (hover: hover) {
+  .contact__group a:hover svg {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
 }
 
 .contact__side {
@@ -1345,6 +1367,7 @@ h1,
   place-items: center;
   padding: clamp(14px, 4vw, 60px);
   background: rgba(8, 8, 8, 0.94);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -1678,8 +1701,10 @@ h1,
   color: var(--ink-muted);
 }
 
-.modal__inner--contact .modal__close:hover {
-  color: var(--ink);
+@media (hover: hover) {
+  .modal__inner--contact .modal__close:hover {
+    color: var(--ink);
+  }
 }
 
 .cmodal__meta {
@@ -1728,8 +1753,10 @@ h1,
   transition: color 0.3s var(--ease);
 }
 
-.cmodal__email:hover .cmodal__email-value {
-  color: var(--accent);
+@media (hover: hover) {
+  .cmodal__email:hover .cmodal__email-value {
+    color: var(--accent);
+  }
 }
 
 .cmodal__email-copy {
@@ -1770,9 +1797,11 @@ h1,
   transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
 
-.cmodal__links a:hover svg {
-  opacity: 1;
-  transform: translate(0, 0);
+@media (hover: hover) {
+  .cmodal__links a:hover svg {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
 }
 
 .cmodal__foot {
@@ -2007,8 +2036,10 @@ h1,
 
 /* Com a lente ativa, os títulos não deslizam no hover (a lente refrata a
    lista capturada, então ela precisa ficar parada). */
-.work-list.has-lens .work-row:hover .work-row__title {
-  transform: none;
+@media (hover: hover) {
+  .work-list.has-lens .work-row:hover .work-row__title {
+    transform: none;
+  }
 }
 
 /* Troca de projeto: o texto novo entra saindo do desfoque (como na referência). */
@@ -2233,8 +2264,10 @@ h1,
     transform: none;
     transition: opacity 0.25s var(--ease);
   }
-  .nav__link:hover {
-    background: rgba(255, 255, 255, 0.28);
+  @media (hover: hover) {
+    .nav__link:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
   }
   .nav__link.is-active {
     background: rgba(255, 255, 255, 0.5);
@@ -2282,8 +2315,10 @@ h1,
   color: inherit;
   transition: background 0.3s var(--ease), transform 0.3s var(--ease);
 }
-.work-stage__nav:hover {
-  background: rgba(255, 255, 255, 0.35);
+@media (hover: hover) {
+  .work-stage__nav:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
 }
 .work-stage__nav:active {
   transform: scale(0.94);
@@ -2440,8 +2475,10 @@ h1,
 .home[data-tone='dark'] .work-stage__nav {
   border-color: rgba(255, 255, 255, 0.18);
 }
-.home[data-tone='dark'] .work-stage__nav:hover {
-  background: rgba(255, 255, 255, 0.12);
+@media (hover: hover) {
+  .home[data-tone='dark'] .work-stage__nav:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -2727,6 +2764,7 @@ body:has(.home[data-tone='dark']) .nav__right .label {
 
 .case {
   min-height: 100vh;
+  min-height: 100svh; /* celular: sem contar a área atrás da barra do navegador */
   padding: var(--case-top) calc(var(--pad) + var(--case-right) + var(--case-gap)) 48px
     calc(var(--pad) + var(--case-left) + var(--case-gap));
   background: var(--case-bg, var(--bg));
@@ -2787,6 +2825,7 @@ body:has(.home[data-tone='dark']) .nav__right .label {
   display: block;
   max-width: 100%;
   max-height: calc(100vh - 108px);
+  max-height: calc(100dvh - 108px);
   width: auto;
   height: auto;
   user-select: none;
@@ -2824,6 +2863,7 @@ body:has(.home[data-tone='dark']) .nav__right .label {
   gap: 12px;
   width: var(--case-left);
   max-height: calc(100vh - var(--case-info-top) - 20px);
+  max-height: calc(100dvh - var(--case-info-top) - 20px);
   padding: 16px;
   overflow: hidden;
   visibility: hidden;
@@ -2997,8 +3037,10 @@ body:has(.home[data-tone='dark']) .nav__right .label {
   color: #141414;
 }
 
-.case__visit:hover {
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .case__visit:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .case__visit.is-disabled {
@@ -3101,7 +3143,7 @@ body:has(.home[data-tone='dark']) .nav__right .label {
   border: 0;
   border-radius: 14px;
   background: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.55);
   translate: -50% -50%; /* separado do transform da animação */
   transform-origin: 50% 0;
   cursor: pointer;
@@ -3126,10 +3168,25 @@ body:has(.home[data-tone='dark']) .nav__right .label {
   object-fit: cover;
   user-select: none;
   pointer-events: none;
+  /* a capa recorta o próprio canto: com só o overflow do card, o Chrome deixava
+     o fundo do card escapar numa linha fina nas 4 bordas (camada com will-change) */
+  border-radius: inherit;
 }
 
 .card-stack__card.is-front {
-  box-shadow: 0 50px 110px -40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  box-shadow: 0 50px 110px -40px rgba(0, 0, 0, 0.6);
+}
+
+/* abertura primeiro: enquanto ela cobre a tela, as animações do site ficam
+   paradas (não gastam CPU por trás) e começam quando a bolha abre */
+html.intro-on #root * {
+  animation-play-state: paused !important;
+}
+
+/* card com capa: sem fundo e sem fio interno atrás da imagem, que só apareciam
+   como uma linha de pixel em volta dela */
+.card-stack__card:has(> img) {
+  background: transparent;
 }
 
 .card-stack__card:focus-visible {
@@ -3168,8 +3225,10 @@ body:has(.home[data-tone='dark']) .nav__right .label {
   transition: background 0.3s var(--ease), opacity 0.3s var(--ease);
 }
 
-.work-view button:hover {
-  opacity: 1;
+@media (hover: hover) {
+  .work-view button:hover {
+    opacity: 1;
+  }
 }
 
 .work-view button.is-active {
@@ -3313,9 +3372,11 @@ body:has(.case[data-tone='dark']) .nav__toggle {
   color: #f4f2ed;
 }
 
-body:has(.home[data-tone='dark']) .nav__link:hover,
-body:has(.case[data-tone='dark']) .nav__link:hover {
-  background: rgba(255, 255, 255, 0.1);
+@media (hover: hover) {
+  body:has(.home[data-tone='dark']) .nav__link:hover,
+  body:has(.case[data-tone='dark']) .nav__link:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
 }
 
 body:has(.home[data-tone='dark']) .nav__link.is-active,
@@ -3410,4 +3471,65 @@ body:has(.case[data-tone='dark']) .nav__link.is-active {
   .work-stage__canvas {
     cursor: pointer;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Níveis de aparelho (src/lib/perfTier.js grava <html data-perf>).
+   alto: nada muda. medio: blur menor e grão parado. baixo: vidro sólido
+   (sem backdrop-filter), fundo e cenas parados como no "reduzir movimento".
+--------------------------------------------------------------------------- */
+:root[data-perf='medio'] .glass {
+  -webkit-backdrop-filter: blur(10px) saturate(1.12);
+  backdrop-filter: blur(10px) saturate(1.12);
+}
+
+:root[data-perf='medio'] .project-bg__grain,
+:root[data-perf='baixo'] .project-bg__grain {
+  animation: none;
+}
+
+/* vidro sem desfoque: mais opaco e com um fio de luz por dentro, para continuar
+   lendo como vidro */
+:root[data-perf='baixo'] .glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--glass-strong);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+:root[data-perf='baixo'] .work-info[data-tone='dark'],
+:root[data-perf='baixo'] .home[data-tone='dark'] .work-stage__caption,
+:root[data-perf='baixo'] .home[data-tone='dark'] .work-view,
+:root[data-perf='baixo'] body:has(.home[data-tone='dark']) .nav__menu,
+:root[data-perf='baixo'] body:has(.case[data-tone='dark']) .nav__menu,
+:root[data-perf='baixo'] .case[data-tone='dark'] .glass {
+  background: rgba(18, 16, 20, 0.84);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+:root[data-perf='baixo'] .modal {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* fundo do projeto parado: as manchas de cor ficam onde estão */
+:root[data-perf='baixo'] .project-bg__blob,
+:root[data-perf='baixo'] .project-bg__motif span,
+:root[data-perf='baixo'] .project-bg__motif i,
+:root[data-perf='baixo'] .project-bg__motif--grid {
+  animation: none;
+}
+
+/* cenas de cada projeto: o mesmo quadro parado do "reduzir movimento" */
+:root[data-perf='baixo'] .amb,
+:root[data-perf='baixo'] .amb * {
+  animation: none !important;
+}
+:root[data-perf='baixo'] .amb .amb-draw,
+:root[data-perf='baixo'] .amb .amb-roots__root {
+  stroke-dashoffset: 0;
+}
+:root[data-perf='baixo'] .amb-growth__plane,
+:root[data-perf='baixo'] .amb-paws__print {
+  opacity: 0;
 }

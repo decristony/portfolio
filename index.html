@@ -14,6 +14,25 @@
     <!-- fontes da primeira tela: começam a baixar junto com o HTML -->
     <link rel="preload" href="/fonts/pczyWZYmicHp9LhGgMJo7tnDcHo.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/xirQ3g4Sv5q7MG0KvL1PiOOLLBA.woff2" as="font" type="font/woff2" crossorigin />
+    <!--
+      Abertura primeiro: decide antes do primeiro quadro se a abertura aparece
+      (primeira visita da sessão). O primeiro quadro já é a página escura dela,
+      e intro.js (defer, antes do bundle) começa a abertura sem esperar o React.
+      O site carrega por trás e só aparece pela bolha.
+    -->
+    <script>
+      (function () {
+        var seen = false;
+        try { seen = sessionStorage.getItem('orvion:intro-seen') === '1'; } catch (e) {}
+        if (!seen) document.documentElement.classList.add('intro-on');
+      })();
+    </script>
+    <style>
+      html.intro-on, html.intro-on body { background: #141414; }
+      html.intro-on #root { pointer-events: none; }
+    </style>
+    <link rel="stylesheet" href="%BASE_URL%intro/intro.css" />
+    <script src="%BASE_URL%intro/intro.js" defer onerror="document.documentElement.classList.remove('intro-on')"></script>
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:title" content="Tony (Decristony) — Web designer e desenvolvedor front-end" />

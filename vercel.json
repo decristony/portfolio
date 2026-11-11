@@ -3,7 +3,7 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!assets/|projects/|about/|fonts/|sounds/|favicon).*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/((?!assets/|projects/|about/|fonts/|sounds/|intro/|favicon|og.jpg|robots.txt).*)", "destination": "/index.html" }],
   "headers": [
     {
       "source": "/assets/(.*)",

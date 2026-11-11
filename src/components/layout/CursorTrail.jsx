@@ -30,6 +30,15 @@ export function CursorTrail() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
+    // aba oculta: descarta o rastro e para o loop
+    const onVisibility = () => {
+      if (!document.hidden) return;
+      cancelAnimationFrame(frame);
+      points = [];
+      running = false;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    };
+
     const draw = () => {
       const now = performance.now();
       points = points.filter((p) => now - p.t < LIFE);
@@ -63,8 +72,10 @@ export function CursorTrail() {
     resize();
     window.addEventListener('resize', resize);
     window.addEventListener('pointermove', onMove, { passive: true });
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       cancelAnimationFrame(frame);
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', onMove);
     };

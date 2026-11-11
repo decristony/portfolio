@@ -14,6 +14,7 @@ import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { bindStepInput } from '../../lib/stepInput';
 import { hasWebGL } from '../../lib/webgl';
+import { useTier } from '../../lib/perfTier';
 
 const COVER_ASPECT = 1616 / 1264;
 const SPACING = 6; // distância entre projetos no túnel
@@ -48,6 +49,8 @@ const fragmentShader = `
   uniform sampler2D map;
   uniform float opacity;
   uniform float blurAmount;
+  uniform float aspect;       // largura / altura da capa
+  uniform float cornerRadius; // raio do canto, em fração da altura
   varying vec2 vUv;
   void main() {
     vec4 color = texture2D(map, vUv);
@@ -64,7 +67,16 @@ const fragmentShader = `
       }
       color = sum / total;
     }
-    gl_FragColor = vec4(color.rgb, color.a * opacity);
+    // acabamento da capa: cantos arredondados como na Sanfona (14px) e borda
+    // suavizada no próprio shader, com 1 pixel de tela de transição. Assim a
+    // borda não serrilha nem mostra a linha de pixels da textura, com ou sem
+    // antialias (que fica desligado nos níveis médio e baixo).
+    vec2 p = (vUv - 0.5) * vec2(aspect, 1.0);
+    vec2 q = abs(p) - (vec2(aspect, 1.0) * 0.5 - cornerRadius);
+    float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - cornerRadius;
+    float edge = max(fwidth(dist), 1e-4);
+    float shape = 1.0 - smoothstep(-edge, 0.0, dist);
+    gl_FragColor = vec4(color.rgb, color.a * opacity * shape);
     // a textura é lida em espaço linear: converte de volta para sRGB,
     // senão as capas aparecem mais escuras do que são
     #include <colorspace_fragment>
@@ -79,6 +91,9 @@ const createMaterial = () =>
       map: { value: null },
       opacity: { value: 0 },
       blurAmount: { value: 0 },
+      aspect: { value: COVER_ASPECT },
+      // 14px da Sanfona sobre a altura típica da capa da frente (~520px)
+      cornerRadius: { value: 0.027 },
       scrollForce: { value: 0 },
       time: { value: 0 },
       waveT: { value: 99 },
@@ -156,6 +171,7 @@ function TunnelScene({
   onOpen,
   pointerRef,
   stepRef,
+  lite = false,
 }) {
   const { camera, size, gl } = useThree();
   const total = projects.length;
@@ -354,8 +370,9 @@ function TunnelScene({
       const mat = materials[item.slot];
       mat.uniforms.map.value = textures[item.project];
       mat.uniforms.opacity.value = opacity;
+      // nível baixo: sem o desfoque de profundidade (25 leituras de textura por pixel)
       mat.uniforms.blurAmount.value =
-        item === s.focus ? 0 : Math.min(MAX_BLUR, (Math.abs(d - focusD) / SPACING) * 1.6);
+        item === s.focus || lite ? 0 : Math.min(MAX_BLUR, (Math.abs(d - focusD) / SPACING) * 1.6);
       mat.uniforms.time.value = time;
       mat.uniforms.waveT.value = mat.userData.hoverAt >= 0 ? time - mat.userData.hoverAt : 99;
       mat.uniforms.scrollForce.value = velocityRef.current * 0.6;
@@ -419,7 +436,7 @@ function TunnelScene({
       scale={[2 * COVER_ASPECT, 2, 1]}
       material={material}
     >
-      <planeGeometry args={[1, 1, 32, 32]} />
+      <planeGeometry args={lite ? [1, 1, 12, 12] : [1, 1, 32, 32]} />
     </mesh>
   ));
 }
@@ -438,6 +455,7 @@ export default function SpaceTunnel({
   fallback = null,
 }) {
   const [webgl] = useState(hasWebGL);
+  const tier = useTier();
   const wrapRef = useRef(null);
   const velocityRef = useRef(0);
   const pointerRef = useRef({ inside: false, x: 0, y: 0, clicked: false });
@@ -523,8 +541,9 @@ export default function SpaceTunnel({
           a cena recomeça do projeto em foco a cada vez que a vista volta */}
       <Canvas
         camera={{ position: [0, 0, 0], fov: 55 }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, alpha: true }}
+        // alto: como sempre; médio e baixo desenham menos pixels e sem antialias
+        dpr={tier === 'alto' ? [1, 1.75] : tier === 'medio' ? [1, 1.5] : 1}
+        gl={{ antialias: tier === 'alto', alpha: true }}
         frameloop={active ? 'always' : 'never'}
       >
         <Suspense fallback={null}>
@@ -540,6 +559,7 @@ export default function SpaceTunnel({
               onOpen={onOpen}
               pointerRef={pointerRef}
               stepRef={stepRef}
+              lite={tier === 'baixo'}
             />
           )}
         </Suspense>

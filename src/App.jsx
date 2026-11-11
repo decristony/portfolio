@@ -11,6 +11,7 @@ import { GlassRevealHost } from './components/layout/GlassReveal';
 import { CursorTrail } from './components/layout/CursorTrail';
 import { INTRO_KEY, Loader } from './components/layout/Loader';
 import { Work } from './pages/Work';
+import { autoTune, useTier } from './lib/perfTier';
 // Projetos vem no pacote inicial; as outras páginas carregam quando são abertas
 const Project = lazy(() => import('./pages/Project').then((m) => ({ default: m.Project })));
 const About = lazy(() => import('./pages/About').then((m) => ({ default: m.About })));
@@ -33,6 +34,12 @@ function Shell() {
   const endIntro = useCallback(() => setIntro(false), []);
 
   useBodyLock(menuOpen || intro);
+  const tier = useTier();
+
+  // depois da abertura, mede o FPS uma vez e rebaixa o nível se o aparelho não aguentar
+  useEffect(() => {
+    if (!intro) autoTune();
+  }, [intro]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -79,7 +86,8 @@ function Shell() {
       <PageTransition />
       <GlassRevealHost />
       <ScrollToTop />
-      <CursorTrail />
+      {/* rastro do cursor: só nos níveis médio e alto */}
+      {tier !== 'baixo' && <CursorTrail />}
 
       <AnimatePresence>{intro && <Loader onDone={endIntro} />}</AnimatePresence>
 

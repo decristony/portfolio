@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { playGlassReveal } from '../components/layout/GlassReveal';
@@ -20,6 +20,24 @@ const total = projects.length;
 
 // three.js fica fora do pacote inicial: baixa logo depois que Projetos abre.
 const SpaceTunnel = lazy(() => import('../components/work/SpaceTunnel'));
+
+/*
+ * Se o 3D falhar (capa que não carrega, WebGL perdido), o erro não pode derrubar
+ * a página inteira (tela branca): o túnel some e Projetos segue na Sanfona.
+ */
+class TunnelGuard extends Component {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error) {
+    console.error('Túnel 3D falhou; seguindo na Sanfona.', error);
+    this.props.onFail?.();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
 
 const VIEW_KEY = 'orvion:work-view';
 const VIEWS = [
@@ -48,7 +66,9 @@ const readView = () => {
  * projeto por vez. O fundo assume o tema do projeto em foco.
  */
 export function Work() {
-  const [webgl] = useState(hasWebGL);
+  const [webglOk] = useState(hasWebGL);
+  const [tunnelFailed, setTunnelFailed] = useState(false);
+  const webgl = webglOk && !tunnelFailed; // 3D que falhou conta como sem WebGL: fica a Sanfona
   const [view, setView] = useState(readView);
   const space = view === 'space' && webgl;
   const tier = useTier();
@@ -176,20 +196,27 @@ export function Work() {
 
       {/* o 3D fica montado nas duas vistas (só roda na Espacial): voltar para ela é imediato */}
       {tunnel && (
-        <Suspense fallback={null}>
-          <SpaceTunnel
-            projects={projects}
-            initial={focus}
-            intro={!reduced}
-            active={space}
-            className="work-stage__canvas"
-            onReady={() => setBridge((b) => (b === 'on' ? 'fading' : b))}
-            onFocusChange={setFocus}
-            onHoverChange={setHovered}
-            onOpen={openProject}
-            controlsRef={controls}
-          />
-        </Suspense>
+        <TunnelGuard
+          onFail={() => {
+            setTunnelFailed(true);
+            setBridge('off');
+          }}
+        >
+          <Suspense fallback={null}>
+            <SpaceTunnel
+              projects={projects}
+              initial={focus}
+              intro={!reduced}
+              active={space}
+              className="work-stage__canvas"
+              onReady={() => setBridge((b) => (b === 'on' ? 'fading' : b))}
+              onFocusChange={setFocus}
+              onHoverChange={setHovered}
+              onOpen={openProject}
+              controlsRef={controls}
+            />
+          </Suspense>
+        </TunnelGuard>
       )}
 
       {!space && stack}

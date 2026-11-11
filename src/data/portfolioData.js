@@ -42,7 +42,7 @@ const rawProjects = [
       'Clínica de dermatologia estética nos Jardins montada como capa de revista: a palavra “pele” passa atrás da modelo e o cursor pinta as letras.',
     typography: ['Cormorant Garamond', 'Jost'],
     colors: ['#F2EBE3', '#A65F43', '#C98767', '#EBD3C6', '#2D201B'],
-    cover: asset('/projects/orvion/tez-dermatologia-estetica.webp'),
+    cover: '/projects/orvion/tez-dermatologia-estetica.webp',
   },
   {
     slug: 'compasso-cardiologia',
@@ -54,7 +54,7 @@ const rawProjects = [
       'Uma direção de arte em que só o coração tem cor: mundo em preto e branco, vermelho reservado à vida e uma ausculta interativa guiada pelo pulso.',
     typography: ['Bodoni Moda', 'Schibsted Grotesk'],
     colors: ['#FBF8F3', '#B21E2D', '#5C0F1C', '#E8D3CB', '#1C1718'],
-    cover: asset('/projects/orvion/compasso-cardiologia.webp'),
+    cover: '/projects/orvion/compasso-cardiologia.webp',
   },
   {
     slug: 'nervura-neurologia',
@@ -66,7 +66,7 @@ const rawProjects = [
       'Um site que se revela como um exame. Um mapa interativo liga cada sintoma a uma região do cérebro, sem começar pelo termo técnico.',
     typography: ['Syne', 'Geist'],
     colors: ['#0B1220', '#F0A64A', '#1D2A40', '#7FB7D6', '#EEF1F5'],
-    cover: asset('/projects/orvion/nervura-neurologia.webp'),
+    cover: '/projects/orvion/nervura-neurologia.webp',
   },
   {
     slug: 'ciranda-pediatria',
@@ -78,7 +78,7 @@ const rawProjects = [
       'Clínica de pediatria de 0 a 12 anos. Uma régua acompanha as fases da infância e uma ferramenta com as referências da OMS aproxima os pais do crescimento do filho.',
     typography: ['Corben', 'Outfit'],
     colors: ['#FFF8EE', '#86B6E4', '#EF7A58', '#CFEBDD', '#F6C453'],
-    cover: asset('/projects/orvion/ciranda-pediatria.webp'),
+    cover: '/projects/orvion/ciranda-pediatria.webp',
   },
   {
     slug: 'clareira-psicologia',
@@ -90,7 +90,7 @@ const rawProjects = [
       'Uma marca que convida a desacelerar. A abertura usa a névoa como metáfora do primeiro passo e três perguntas ajudam a escolher o acompanhamento.',
     typography: ['Gilda Display', 'Nunito Sans'],
     colors: ['#EDF0EB', '#173634', '#A2532F', '#A7BAAC', '#E7DED0'],
-    cover: asset('/projects/orvion/clareira-psicologia.webp'),
+    cover: '/projects/orvion/clareira-psicologia.webp',
   },
   {
     slug: 'passada-medicina-esportiva',
@@ -102,7 +102,7 @@ const rawProjects = [
       'Para atletas amadores que querem treinar mais e se lesionar menos: tipografia condensada, laranja de sinalização e o corpo em movimento.',
     typography: ['Big Shoulders Display', 'Barlow'],
     colors: ['#0D141F', '#FF5B1F', '#172233', '#FFB089', '#F4F2ED'],
-    cover: asset('/projects/orvion/passada-medicina-esportiva.webp'),
+    cover: '/projects/orvion/passada-medicina-esportiva.webp',
   },
   {
     slug: 'sereno-clinica-do-sono',
@@ -114,7 +114,7 @@ const rawProjects = [
       'Um site que dura uma noite: um relógio vai de 22:00 a 07:00 conforme a rolagem e a única luz acesa é o cursor.',
     typography: ['Instrument Serif', 'Manrope'],
     colors: ['#0A0F24', '#B7B2F5', '#F2B36B', '#F3E9CF', '#1B2452'],
-    cover: asset('/projects/orvion/sereno-clinica-do-sono.webp'),
+    cover: '/projects/orvion/sereno-clinica-do-sono.webp',
     // noite: preto aveludado no tom da capa, com o céu estrelado também na tela Projetos
     theme: { background: '#0b0e10', primary: '#1c2327', secondary: '#151a1e', accent: '#B7B2F5' },
   },
@@ -128,7 +128,7 @@ const rawProjects = [
       'Abre fora de foco, de propósito. A foto fica nítida em um segundo e um simulador mostra a tabela de letras embaçando como numa miopia.',
     typography: ['Fraunces', 'DM Sans'],
     colors: ['#F6F4EE', '#0E3B43', '#2F6FA8', '#9ED9CC', '#FF7A59'],
-    cover: asset('/projects/orvion/iris-oftalmologia.webp'),
+    cover: '/projects/orvion/iris-oftalmologia.webp',
   },
   {
     slug: 'marfim-odontologia',
@@ -140,7 +140,7 @@ const rawProjects = [
       'A primeira coisa que o site faz é clarear a própria foto. O título passa de contorno para letra cheia no ritmo do sorriso.',
     typography: ['Bricolage Grotesque', 'Figtree'],
     colors: ['#F4EFE6', '#0D3237', '#C4794B', '#BFD9D3', '#172021'],
-    cover: asset('/projects/orvion/marfim-odontologia.webp'),
+    cover: '/projects/orvion/marfim-odontologia.webp',
   },
   {
     slug: 'faro-clinica-veterinaria',
@@ -152,7 +152,7 @@ const rawProjects = [
       'Plantão 24 horas para tutores preocupados. A foto abre em persianas e, no desktop, o cursor vira a luz do otoscópio.',
     typography: ['Young Serif', 'Rethink Sans'],
     colors: ['#F7F1E8', '#13304A', '#EE9A55', '#A9BFA8', '#F6C79D'],
-    cover: asset('/projects/orvion/faro-clinica-veterinaria.webp'),
+    cover: '/projects/orvion/faro-clinica-veterinaria.webp',
   },
   {
     slug: 'raiz-fisioterapia-pilates',
@@ -164,7 +164,7 @@ const rawProjects = [
       'Estúdio de fisioterapia ortopédica, esportiva e pilates clínico, com avaliação completa e turmas de até 3 alunos.',
     typography: ['Archivo Expanded', 'Archivo'],
     colors: ['#F1ECE2', '#E0482B', '#6B7A2A', '#D9A21B', '#141414'],
-    cover: asset('/projects/orvion/raiz-fisioterapia-pilates.webp'),
+    cover: '/projects/orvion/raiz-fisioterapia-pilates.webp',
     // preto da capa, para as raízes e o vermelho aparecerem
     theme: { background: '#111110', primary: '#2b2c22', secondary: '#1d1c19', accent: '#E0482B' },
   },
@@ -178,7 +178,7 @@ const rawProjects = [
       'Clínica de obstetrícia no Umarizal: pré-natal, ultrassom, preparo para o parto e pós-parto com a mesma equipe.',
     typography: ['DM Serif Display', 'Karla'],
     colors: ['#F5ECE2', '#6A3726', '#9E4529', '#E0AE63', '#2B1620'],
-    cover: asset('/projects/orvion/colo-obstetricia.webp'),
+    cover: '/projects/orvion/colo-obstetricia.webp',
   },
   {
     slug: 'meridiano-acupuntura',
@@ -190,7 +190,7 @@ const rawProjects = [
       'Clínica na Asa Sul com acupuntura, moxabustão, ventosaterapia, tuiná e fitoterapia.',
     typography: ['Playfair Display', 'Work Sans'],
     colors: ['#171514', '#D9772F', '#A8642A', '#D6A867', '#EFE7DA'],
-    cover: asset('/projects/orvion/meridiano-acupuntura.webp'),
+    cover: '/projects/orvion/meridiano-acupuntura.webp',
   },
   {
     slug: 'timbre-otorrino-audiologia',
@@ -202,7 +202,7 @@ const rawProjects = [
       'Otorrinolaringologia, audiologia e fonoaudiologia em Petrópolis: audiometria, aparelho auditivo, voz, zumbido e otorrino infantil.',
     typography: ['Anybody', 'Inter Tight'],
     colors: ['#F1EFEA', '#3E95A5', '#E8572F', '#1F6672', '#0E2329'],
-    cover: asset('/projects/orvion/timbre-otorrino-audiologia.webp'),
+    cover: '/projects/orvion/timbre-otorrino-audiologia.webp',
   },
 ].map((project) => ({
   team: TEAM,

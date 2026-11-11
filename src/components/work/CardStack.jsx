@@ -99,7 +99,9 @@ export function CardStack({
         if (k === total - 1) k = -1;
         if (k > BEHIND + 1) return null; // fora da janela: nem existe na página
         const front = k === 0;
-        const withImage = k >= -1 && k <= 1; // foco, a de trás e a que acabou de sair
+        // foco, a de trás e a que acabou de sair. Na ponte (por baixo da abertura)
+        // só as 2 primeiras: a "que saiu" é invisível e não precisa ser baixada
+        const withImage = k >= (interactive ? -1 : 0) && k <= 1;
         // a capa da frente já nasce no lugar: nunca some nem muda ao trocar de vista
         const from = gathering && !front && k > 0 && k <= BEHIND ? scattered(k) : false;
         const [c0, c1] = project.colors;

@@ -10,7 +10,6 @@
  */
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { bindStepInput } from '../../lib/stepInput';
 import { hasWebGL } from '../../lib/webgl';
@@ -139,6 +138,77 @@ function paletteTexture(project) {
   return texture;
 }
 
+/*
+ * Fila de capas: em vez de baixar, decodificar e mandar para a placa de vídeo as
+ * 14 capas no mesmo instante (o que travava o celular logo depois da abertura),
+ * carrega uma por vez, a partir do projeto em foco:
+ * - as 2 primeiras (foco e a de trás) já foram baixadas pela Sanfona durante a
+ *   abertura e entram na hora;
+ * - as outras esperam a pilha se abrir (1,2 s) e entram uma atrás da outra, nos
+ *   intervalos livres, cada uma decodificada fora da thread principal e enviada
+ *   sozinha para a placa de vídeo.
+ * Capa que falhar (404, rede) vira a capa genérica da paleta, sem derrubar o 3D.
+ * As texturas ficam guardadas: voltar para a vista Espacial não baixa de novo.
+ */
+const coverCache = new Map(); // src → THREE.Texture
+const FIRST_BATCH = 2;
+const AFTER_OPEN_MS = 1200;
+const GAP_MS = 140;
+
+const waitIdle = (ms) =>
+  new Promise((resolve) => {
+    window.setTimeout(() => {
+      if (window.requestIdleCallback) window.requestIdleCallback(() => resolve(), { timeout: 400 });
+      else window.requestAnimationFrame(() => resolve());
+    }, ms);
+  });
+
+async function loadCover(project) {
+  if (!project.cover) return paletteTexture(project);
+  const hit = coverCache.get(project.cover);
+  if (hit) return hit;
+  const img = new Image();
+  img.decoding = 'async';
+  img.src = project.cover;
+  try {
+    await img.decode();
+  } catch {
+    return paletteTexture(project);
+  }
+  const texture = new THREE.Texture(img);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  coverCache.set(project.cover, texture);
+  return texture;
+}
+
+function useCoverQueue(projects, initial, gl) {
+  const textures = useRef(projects.map(() => null));
+  useEffect(() => {
+    let alive = true;
+    const total = projects.length;
+    (async () => {
+      for (let n = 0; n < total && alive; n += 1) {
+        const i = (initial + n) % total;
+        const cached = projects[i].cover && coverCache.has(projects[i].cover);
+        if (n === FIRST_BATCH) await waitIdle(AFTER_OPEN_MS);
+        else if (n > FIRST_BATCH && !cached) await waitIdle(GAP_MS);
+        if (!alive) return;
+        const texture = await loadCover(projects[i]);
+        if (!alive) return;
+        gl.initTexture(texture); // sobe para a placa de vídeo agora, sozinha
+        textures.current[i] = texture;
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+    // a fila começa uma vez por montagem, a partir do foco daquele momento
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return textures;
+}
+
 /* Posição fixa de cada passo do túnel (o mesmo j sempre cai no mesmo lugar). */
 const spot = (j, spreadX, spreadY) => {
   // ângulo de ouro: cada projeto cai numa direção diferente, sempre longe do anterior
@@ -176,17 +246,9 @@ function TunnelScene({
   const { camera, size, gl } = useThree();
   const total = projects.length;
 
-  const covers = useMemo(() => projects.filter((p) => p.cover).map((p) => p.cover), [projects]);
-  const loaded = useTexture(covers);
-  const textures = useMemo(() => {
-    let i = 0;
-    return projects.map((p) => {
-      if (!p.cover) return paletteTexture(p);
-      const t = loaded[i++];
-      t.colorSpace = THREE.SRGBColorSpace;
-      return t;
-    });
-  }, [projects, loaded]);
+  // capas chegam uma por uma (ver useCoverQueue); até chegar, a capa não aparece
+  const textures = useCoverQueue(projects, initial, gl);
+  const appear = useRef(projects.map(() => 0)); // 0 → 1: cada capa surge suave ao chegar
 
   const materials = useMemo(() => Array.from({ length: POOL }, createMaterial), []);
   useEffect(() => () => materials.forEach((m) => m.dispose()), [materials]);
@@ -335,11 +397,15 @@ function TunnelScene({
     const target = spot(s.focus.seq, spreadX, spreadY);
     if (!cam.current) cam.current = { x: target.x, y: target.y, vx: 0, vy: 0, roll: 0 };
     const c = cam.current;
-    if (introT.current < 1) introT.current = Math.min(1, introT.current + dt / 1.1);
-    if (!ready.current) {
-      // primeiro quadro com as capas carregadas: a Sanfona por cima já pode sair
+    if (!ready.current && textures.current[s.focus.project]) {
+      // a capa em foco já está na placa de vídeo: a Sanfona por cima já pode sair
       ready.current = true;
       onReady?.();
+    }
+    // as capas só saem da pilha depois que a do foco chegou
+    if (ready.current && introT.current < 1) introT.current = Math.min(1, introT.current + dt / 1.1);
+    for (let i = 0; i < total; i += 1) {
+      if (textures.current[i] && appear.current[i] < 1) appear.current[i] = Math.min(1, appear.current[i] + dt / 0.6);
     }
     const stiffness = 9;
     const damping = 2 * Math.sqrt(stiffness) * 0.92;
@@ -363,13 +429,21 @@ function TunnelScene({
       const fadeFar = 1 - THREE.MathUtils.clamp((d - (farD - SPACING * 1.5)) / (SPACING * 1.5), 0, 1);
       const fadeNear = THREE.MathUtils.clamp((d - 0.6) / (focusD * 0.6), 0, 1);
       const opacity = Math.min(fadeFar, fadeNear);
+      const tex = textures.current[item.project];
       if (item.slot < 0) return opacity;
+      if (!tex) {
+        // capa ainda na fila: o lugar fica reservado, sem desenhar nada
+        const mesh = meshes.current[item.slot];
+        if (mesh) mesh.visible = false;
+        return opacity;
+      }
+      const shown = opacity * appear.current[item.project];
       const base = spot(item.seq, spreadX, spreadY);
       const extra = Math.max(0, d - focusD);
       const dir = item.seq * 2.399963 + 0.8;
       const mat = materials[item.slot];
-      mat.uniforms.map.value = textures[item.project];
-      mat.uniforms.opacity.value = opacity;
+      mat.uniforms.map.value = tex;
+      mat.uniforms.opacity.value = shown;
       // nível baixo: sem o desfoque de profundidade (25 leituras de textura por pixel)
       mat.uniforms.blurAmount.value =
         item === s.focus || lite ? 0 : Math.min(MAX_BLUR, (Math.abs(d - focusD) / SPACING) * 1.6);
@@ -379,7 +453,7 @@ function TunnelScene({
       const mesh = meshes.current[item.slot];
       if (mesh) {
         // cada capa na sua proporção (ex.: a da Tez é quadrada), sem esticar
-        const img = textures[item.project].image;
+        const img = tex.image;
         const ratio = img && img.width && img.height ? img.width / img.height : COVER_ASPECT;
         const h = Math.min(2, fitW / ratio);
         mesh.scale.set(h * ratio, h, 1);
@@ -408,9 +482,9 @@ function TunnelScene({
           rz,
         );
         mesh.renderOrder = Math.round(1000 - d * 10);
-        mesh.visible = opacity > 0.01;
+        mesh.visible = shown > 0.01;
         mesh.userData.item = item;
-        mesh.userData.pickable = pickable && opacity > 0.4;
+        mesh.userData.pickable = pickable && shown > 0.4;
       }
       return opacity;
     };

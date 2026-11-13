@@ -3607,13 +3607,6 @@ a.about-row:active {
   text-align: right;
 }
 
-.contact-info__note {
-  margin-top: 18px;
-  color: var(--ink-muted);
-  font-size: var(--fs-small);
-  line-height: 1.5;
-}
-
 @media (max-width: 1099px) {
   .contact {
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
@@ -3641,5 +3634,15 @@ a.about-row:active {
   }
   .contact-panel__palette {
     text-align: left;
+  }
+}
+
+/* Desktop: o menu fica numa coluna à esquerda (146 px). Sobre e Contato começam
+   depois dele, então os cards ficam ao lado do menu e não por baixo. */
+@media (min-width: 1100px) {
+  .about,
+  .contact {
+    --menu-gap: calc(146px + 12px);
+    padding-left: calc(var(--pad) + var(--menu-gap));
   }
 }

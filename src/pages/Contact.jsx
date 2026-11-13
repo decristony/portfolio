@@ -155,7 +155,6 @@ export function Contact() {
               </div>
             ))}
           </dl>
-          <p className="contact-info__note">{credits.note}</p>
         </section>
       </div>
     </main>

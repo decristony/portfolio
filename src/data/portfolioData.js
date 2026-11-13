@@ -331,7 +331,6 @@ export const portfolioData = {
       { label: 'Tipografia', value: 'BT Grotesk, BT Glyphius, F37 Bolton' },
       { label: 'Feito com', value: 'React, Vite, Framer Motion' },
     ],
-    note: 'Os sites de clínicas são projetos conceituais da OrvionWeb: marcas fictícias, sem vínculo com clínicas reais.',
   },
 };
 

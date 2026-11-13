@@ -575,7 +575,8 @@
           rim.style.width = `${(r + band) * 2}px`;
           rim.style.height = `${(r + band) * 2}px`;
           rim.style.setProperty('--edge', `${(r / (r + band)) * 100}%`);
-          rim.style.opacity = String(1 - smooth(0.78, 1, t)); // a borda fica visível quase até o fim
+          // a borda só aparece quando a bolha já é grande: sem a bolhinha no centro; some só no fim
+          rim.style.opacity = String(smooth(max * 0.16, max * 0.3, r) * (1 - smooth(0.78, 1, t)));
           if (t < 1) frame = requestAnimationFrame(run);
           else res();
         };

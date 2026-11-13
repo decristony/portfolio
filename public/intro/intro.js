@@ -288,7 +288,7 @@
   const START_POS = -1.8; // a faixa começa com a primeira capa na borda direita
   const INTRO_S = 1.1; // as capas sobem de baixo, uma depois da outra
   const OPEN_DUR = 1.0;
-  const REVEAL_MS = 1500;
+  const REVEAL_MS = 2300; // a bolha abre mais devagar, para dar para ver
 
   const clamp = (v, a = 0, b = 1) => Math.min(Math.max(v, a), b);
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -565,7 +565,7 @@
           const H = window.innerHeight;
           const max = Math.hypot(W, H) / 2 + 80;
           const t = clamp((now - t0) / REVEAL_MS);
-          const r = easeInOut(t) * max;
+          const r = lerp(t, easeInOut(t), 0.55) * max; // crescimento mais uniforme: não some no meio
           // a página clara ganha um buraco redondo que cresce...
           const mask = `radial-gradient(circle at 50% 50%, transparent ${r}px, #000 ${r + 1.5}px)`;
           stage.style.webkitMaskImage = mask;
@@ -575,7 +575,7 @@
           rim.style.width = `${(r + band) * 2}px`;
           rim.style.height = `${(r + band) * 2}px`;
           rim.style.setProperty('--edge', `${(r / (r + band)) * 100}%`);
-          rim.style.opacity = String(1 - Math.pow(t, 3));
+          rim.style.opacity = String(1 - smooth(0.78, 1, t)); // a borda fica visível quase até o fim
           if (t < 1) frame = requestAnimationFrame(run);
           else res();
         };

@@ -111,15 +111,20 @@
   border-radius: 50%;
   pointer-events: none;
   translate: -50% -50%;
-  /* só a faixa da borda refrata: desfoca, satura e clareia o que passa por ela */
-  -webkit-backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
-  backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
-  -webkit-mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
-  mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-    inset 0 0 40px rgba(255, 255, 255, 0.18),
-    0 0 60px rgba(255, 255, 255, 0.12);
+  /* a borda precisa aparecer sobre o fundo claro: um fio escuro e fino, um brilho
+     branco logo dentro dele e uma sombra suave para fora, que dá volume à bolha */
+  background: radial-gradient(
+    circle,
+    transparent calc(var(--edge) - 1.4%),
+    rgba(255, 255, 255, 0.95) calc(var(--edge) - 0.5%),
+    rgba(255, 255, 255, 0.9) calc(var(--edge) + 0.1%),
+    rgba(20, 20, 20, 0.7) calc(var(--edge) + 0.5%),
+    rgba(20, 20, 20, 0.22) calc(var(--edge) + 1.6%),
+    transparent calc(var(--edge) + 7%)
+  );
+  -webkit-mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1.6%), #000 calc(var(--edge) - 1.2%), #000 100%);
+  mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1.6%), #000 calc(var(--edge) - 1.2%), #000 100%);
+  box-shadow: 0 0 60px rgba(20, 20, 20, 0.08);
 }
 
 /* aberração cromática fina: duas bordas coloridas levemente deslocadas */
@@ -129,24 +134,14 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  mix-blend-mode: screen;
 }
 
 .oi-rim::before {
-  box-shadow: inset 2px 0 0 rgba(255, 70, 90, 0.45);
+  box-shadow: inset 2px 0 0 rgba(255, 70, 90, 0.5);
 }
 
 .oi-rim::after {
-  box-shadow: inset -2px 0 0 rgba(60, 200, 255, 0.45);
-}
-
-/* celular e tablet: a borda da bolha sem o vidro que desfoca o fundo
-   (esse filtro, com o 3D por trás, fazia a tela piscar) */
-@media (hover: none), (pointer: coarse) {
-  .oi-rim {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
+  box-shadow: inset -2px 0 0 rgba(60, 200, 255, 0.5);
 }
 
 /* botão discreto para pular */

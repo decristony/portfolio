@@ -1,15 +1,15 @@
 /* Abertura do portfólio (intro.js). Usada pelo site e por preview/abertura.html. */
 
 .oi {
-  --oi-night: #141414;
-  --oi-paper: #f4f2ed;
+  --oi-bg: #f0f0ea;
+  --oi-ink: #141414;
   --oi-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --oi-display: 'Glyphius', 'Times New Roman', serif;
   --oi-sans: 'Grotesk', 'Helvetica Neue', Arial, sans-serif;
   position: fixed;
   inset: 0;
   z-index: 500;
-  color: var(--oi-paper);
+  color: var(--oi-ink);
   font-family: var(--oi-sans);
   transition: opacity 0.6s var(--oi-ease);
 }
@@ -29,99 +29,124 @@
   pointer-events: none;
 }
 
-/* a página: tinta da marca TD, com grão */
+/* a página clara: o texto e, por cima, a faixa de capas */
 .oi-stage {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
   overflow: hidden;
-  background: var(--oi-night);
+  background: var(--oi-bg);
 }
 
-.oi-grain {
+.oi-canvas {
   position: absolute;
-  inset: -50%;
-  pointer-events: none;
-  opacity: 0.09;
-  mix-blend-mode: screen;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: oi-grain 0.8s steps(2) infinite;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-@keyframes oi-grain {
-  0% { transform: translate(0, 0); }
-  50% { transform: translate(-3%, 2%); }
-  100% { transform: translate(2%, -3%); }
-}
-
-/* ---------- digitação ---------- */
-.oi-hello {
+/* ---------- ORVION ---------- */
+.oi-brand {
   position: absolute;
-  z-index: 1;
-  margin: 0;
+  top: 50%;
+  left: 50%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  font-size: clamp(38px, 5.2vw, 64px);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition: opacity 0.26s ease;
-}
-
-.oi-hello::before {
-  content: '';
-  width: 10px;
-  height: 10px;
-  margin-right: 14px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.85;
-}
-
-.oi-hello.is-out {
-  opacity: 0;
-}
-
-.oi-type {
-  position: relative;
-  z-index: 1;
-  padding: 0 24px;
   text-align: center;
-  transition: transform 1.2s var(--oi-ease), opacity 0.9s var(--oi-ease), filter 0.9s var(--oi-ease);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
 }
 
-.oi-type.is-out {
-  transform: scale(1.25);
-  opacity: 0;
-  filter: blur(8px);
+.oi-brand__title {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0.1em 0;
 }
 
-.oi-type p {
-  margin: 0;
-  min-height: 0.95em;
-  font-family: var(--oi-display);
-  font-size: clamp(44px, 8vw, 124px);
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-}
-
-.oi-type p + p {
-  opacity: 0.5;
-}
-
-/* a barrinha de digitação, a mesma do começo ao fim */
-.oi-caret {
+.oi-brand__char {
   display: inline-block;
-  width: 0.07em;
-  height: 0.86em;
-  margin-left: 0.05em;
-  background: currentColor;
-  transform: translateY(0.06em);
+  font-family: var(--oi-display);
+  font-size: clamp(42px, 8.5vw, 92px);
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(105%);
+  will-change: transform, opacity;
 }
 
-.oi-caret.is-off {
+.oi-brand__sub {
+  margin-top: 14px;
+  font-size: clamp(10px, 1.25vw, 14px);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
   opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.8s var(--oi-ease), transform 0.8s var(--oi-ease);
+}
+
+.oi-brand__sub.is-in {
+  opacity: 0.72;
+  transform: none;
+}
+
+.oi-brand__sub.is-out {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+/* ---------- bolha de vidro (como a do clique num projeto) ---------- */
+.oi-rim {
+  --edge: 85%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  translate: -50% -50%;
+  /* só a faixa da borda refrata: desfoca, satura e clareia o que passa por ela */
+  -webkit-backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
+  backdrop-filter: blur(7px) saturate(1.8) brightness(1.12);
+  -webkit-mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
+  mask-image: radial-gradient(circle, transparent calc(var(--edge) - 1%), #000 var(--edge), #000 97%, transparent 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    inset 0 0 40px rgba(255, 255, 255, 0.18),
+    0 0 60px rgba(255, 255, 255, 0.12);
+}
+
+/* aberração cromática fina: duas bordas coloridas levemente deslocadas */
+.oi-rim::before,
+.oi-rim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+
+.oi-rim::before {
+  box-shadow: inset 2px 0 0 rgba(255, 70, 90, 0.45);
+}
+
+.oi-rim::after {
+  box-shadow: inset -2px 0 0 rgba(60, 200, 255, 0.45);
+}
+
+/* celular e tablet: a borda da bolha sem o vidro que desfoca o fundo
+   (esse filtro, com o 3D por trás, fazia a tela piscar) */
+@media (hover: none), (pointer: coarse) {
+  .oi-rim {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 /* botão discreto para pular */
@@ -135,10 +160,10 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--oi-paper);
+  color: var(--oi-ink);
   font: inherit;
   font-size: 12px;
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: pointer;
   transition: opacity 0.25s ease;
 }
@@ -155,10 +180,4 @@
 
 .oi.is-revealing .oi-skip {
   opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .oi-grain {
-    animation: none;
-  }
 }

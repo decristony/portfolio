@@ -16,7 +16,7 @@
     <link rel="preload" href="/fonts/xirQ3g4Sv5q7MG0KvL1PiOOLLBA.woff2" as="font" type="font/woff2" crossorigin />
     <!--
       Abertura primeiro: decide antes do primeiro quadro se a abertura aparece
-      (primeira visita da sessão). O primeiro quadro já é a página escura dela,
+      (primeira visita da sessão). O primeiro quadro já é a página clara dela,
       e intro.js (defer, antes do bundle) começa a abertura sem esperar o React.
       O site carrega por trás e só aparece pela bolha.
     -->
@@ -28,7 +28,7 @@
       })();
     </script>
     <style>
-      html.intro-on, html.intro-on body { background: #141414; }
+      html.intro-on, html.intro-on body { background: #f0f0ea; }
       html.intro-on #root { pointer-events: none; }
     </style>
     <link rel="stylesheet" href="%BASE_URL%intro/intro.css" />

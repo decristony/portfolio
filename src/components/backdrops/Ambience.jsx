@@ -63,6 +63,7 @@ const NERVES = [
   ...branches(1460, 720, Math.PI + 0.2, 280, 6, 7),
   ...branches(700, -20, Math.PI / 2 + 0.1, 220, 5, 3),
 ];
+const SIGNALS = NERVES.filter((_, i) => i % 3 === 0); // ramos com sinal correndo
 const ROOTS = [
   ...branches(260, 920, -Math.PI / 2 - 0.15, 230, 6, 4),
   ...branches(820, 920, -Math.PI / 2 + 0.05, 260, 7, 9),
@@ -89,16 +90,24 @@ function Scene({ scene, dark }) {
       return <StarsBackdrop className="amb-canvas amb-stars" />;
     case 'synapse':
       return (
-        <svg className="amb-lines amb-synapse" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-          {NERVES.map((n, i) => (
-            <g key={n.d}>
-              <path className="amb-synapse__nerve" d={n.d} style={{ opacity: 0.18 + n.depth * 0.05 }} />
-              {i % 3 === 0 && (
-                <path pathLength="1" className="amb-synapse__signal" d={n.d} style={{ animationDelay: `${(i * 0.37) % 4}s` }} />
-              )}
-            </g>
-          ))}
-        </svg>
+        // dois SVGs: os nervos (parados, desenhados uma vez) e os sinais (os únicos
+        // que se mexem). Juntos, cada quadro redesenhava os ~150 nervos com filtro de
+        // brilho e a página caía para ~35 FPS. Sem filtro e sem traço de brilho
+        // extra (os dois pesavam): o sinal é só um traço um pouco mais grosso.
+        <>
+          <svg className="amb-lines amb-synapse" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+            {NERVES.map((n) => (
+              <path key={n.d} className="amb-synapse__nerve" d={n.d} style={{ opacity: 0.18 + n.depth * 0.05 }} />
+            ))}
+          </svg>
+          <svg className="amb-lines amb-synapse amb-synapse--signals" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+            {SIGNALS.map((n, i) => (
+              <g key={n.d} style={{ animationDelay: `${(i * 3 * 0.37) % 4}s` }}>
+                <path pathLength="1" className="amb-synapse__signal" d={n.d} />
+              </g>
+            ))}
+          </svg>
+        </>
       );
     case 'growth':
       return (

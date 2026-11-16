@@ -130,12 +130,17 @@
 
 .amb-synapse__signal {
   stroke: var(--a1);
-  stroke-width: 2.6;
+  stroke-width: 3.2; /* sem filtro de brilho nem traço extra: cada um derrubava o FPS */
   stroke-dasharray: 0.07 0.93;
   stroke-dashoffset: 1;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 5px var(--a1));
   animation: amb-signal 3.4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  animation-delay: inherit; /* o atraso de cada sinal fica no <g> */
+}
+
+/* só a camada dos sinais se mexe: ganha camada própria e os nervos não repintam */
+.amb-synapse--signals {
+  will-change: transform;
 }
 
 @keyframes amb-signal {

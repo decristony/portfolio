@@ -101,7 +101,7 @@
 
 /* ---------- bolha de vidro (como a do clique num projeto) ---------- */
 .oi-rim {
-  --edge: 85%;
+  --edge: 86.2%; /* raio / (raio + faixa de 16%): fixo, a borda só muda de escala */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -111,6 +111,8 @@
   border-radius: 50%;
   pointer-events: none;
   translate: -50% -50%;
+  transform: scale(0.001);
+  will-change: transform, opacity;
   /* a borda precisa aparecer sobre o fundo claro: um fio escuro e fino, um brilho
      branco logo dentro dele e uma sombra suave para fora, que dá volume à bolha */
   background: radial-gradient(

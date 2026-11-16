@@ -2761,7 +2761,8 @@ body:has(.case[data-tone='dark']) .nav__right .label {
 
 /* abertura primeiro: enquanto ela cobre a tela, as animações do site ficam
    paradas (não gastam CPU por trás) e começam quando a bolha abre */
-html.intro-on #root * {
+html.intro-on #root *,
+html.intro-hold #root * {
   animation-play-state: paused !important;
 }
 

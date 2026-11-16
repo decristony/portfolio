@@ -556,6 +556,8 @@
     }
 
     /* ---------- bolha de vidro: abre do centro e revela Projetos ---------- */
+    const RIM_K = 1.16; // a faixa de vidro tem 16% do raio (borda em 1/1,16 ≈ 86%)
+    let rimSize = 0;
     function reveal() {
       return new Promise((res) => {
         el.classList.add('is-revealing');
@@ -570,11 +572,15 @@
           const mask = `radial-gradient(circle at 50% 50%, transparent ${r}px, #000 ${r + 1.5}px)`;
           stage.style.webkitMaskImage = mask;
           stage.style.maskImage = mask;
-          // ...com uma borda de vidro que refrata o que passa por ela
-          const band = Math.max(18, r * 0.16);
-          rim.style.width = `${(r + band) * 2}px`;
-          rim.style.height = `${(r + band) * 2}px`;
-          rim.style.setProperty('--edge', `${(r / (r + band)) * 100}%`);
+          // ...com uma borda de vidro que refrata o que passa por ela. A borda é
+          // desenhada uma vez, no tamanho final, e só muda de escala (transform):
+          // redesenhar o gradiente, a máscara e a sombra a cada quadro derrubava o FPS
+          if (!rimSize) {
+            rimSize = max * RIM_K * 2;
+            rim.style.width = `${rimSize}px`;
+            rim.style.height = `${rimSize}px`;
+          }
+          rim.style.transform = `scale(${Math.max(0.001, (r * RIM_K * 2) / rimSize)})`;
           // a borda só aparece quando a bolha já é grande: sem a bolhinha no centro; some só no fim
           rim.style.opacity = String(smooth(max * 0.16, max * 0.3, r) * (1 - smooth(0.78, 1, t)));
           if (t < 1) frame = requestAnimationFrame(run);
@@ -812,10 +818,15 @@
         if (boot.onSound) boot.onSound(on);
       },
       // a bolha abre: o fundo claro do primeiro quadro sai para o site aparecer pelo buraco
-      onReveal: () => docEl.classList.remove('intro-on'),
+      // as animações do site seguem paradas durante a bolha (intro-hold) e começam
+      // quando ela termina: as duas juntas derrubavam o FPS da transição
+      onReveal: () => {
+        docEl.classList.add('intro-hold');
+        docEl.classList.remove('intro-on');
+      },
       onDone: () => {
         boot.done = true;
-        docEl.classList.remove('intro-on');
+        docEl.classList.remove('intro-on', 'intro-hold');
         if (boot.onDone) boot.onDone();
         boot.waiters.splice(0).forEach((fn) => fn());
       },
